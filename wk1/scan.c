@@ -42,7 +42,7 @@ int main(void) {
     printf("type something: ");
     scanf(" %c", &hoho);
     // The space before %c is a crucial part of this code. Without it, if the user had previously entered input that included a newline character (like pressing enter), scanf would consume this newline character as the next input, without waiting for the user to type anything. By adding a space before %c, scanf is instructed to skip any leading whitespace characters, including newline characters, ensuring that it waits for the user's actual input.
-    printf("%c\n", hoho);
+    printf("%d, %c\n", hoho, hoho);
     
 
     /* 我得到了下面的结果，
