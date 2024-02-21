@@ -5,7 +5,7 @@ int main(void)
     int x = 1, y = 0;
     while(y < 5)
     {
-        while(x < 6)
+        while(x < y+2)
         {
             printf("%d ", x);
             x++;
