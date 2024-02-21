@@ -1,7 +1,8 @@
 #include <stdio.h>
 
 int main(void) {
-    int dividend, divisor;
+    int dividend = 0, divisor = 0;
+    double result;
 
     printf("Enter the dividend: ");
     scanf("%d", &dividend);
@@ -14,10 +15,12 @@ int main(void) {
     
     printf("%d divided by %d\n", dividend, divisor);
 
+
+    result = (float)dividend / divisor;
     printf("To the nearest integer: %d\n", dividend/divisor);
-    printf("To 1 decimal place: %.1f\n", (float)dividend/divisor);
-    printf("To 1 decimal place: %.5f\n", (float)dividend/divisor);
-    printf("To 1 decimal place: %.20f\n", (float)dividend/divisor);
+    printf("To 1 decimal place: %.1lf\n", result);
+    printf("To 5 decimal places: %.5lf\n", result);
+    printf("To 20 decimal places: %.20lf\n", result);
 
     return 0;
 }
