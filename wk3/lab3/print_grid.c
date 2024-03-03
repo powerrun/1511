@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-struct grid
+struct coordinates
 {
     int x;
     int y;
@@ -8,22 +8,21 @@ struct grid
 
 int main(void)
 {
-    struct grid mygrid;
-    int i = 5;
-    mygrid.x = i;
-    mygrid.y = i;
+    int counter = 0;
+    struct coordinates pair;
+    printf("Enter size: ");
+    scanf("%d", &counter);
 
-    while (y < i)
+    for (pair.x = 0; pair.x < counter; pair.x++)
     {
-        printf("(%d, %d)", x, y);
-
-
+        for (pair.y = 0; pair.y < counter; pair.y++)
+        {
+            printf("(%d, %d) ", pair.x, pair.y);
+        }
+        if (pair.y >= counter)
+        {
+            printf("\n");
+        }
     }
-
-
-}
-
-
-
     return 0;
 }
