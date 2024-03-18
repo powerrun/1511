@@ -18,7 +18,7 @@ int main(void) {
     return 0;
 }
 
-// bug code
+/***** bug code *****/
 
 // #include <stdio.h>
 // #include <string.h>
