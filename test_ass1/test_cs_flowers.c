@@ -54,9 +54,8 @@ struct tile {
 
 // TODO: Put your structs here 
 
-//--------------------------------------------------------
-// Your Function Prototypes
-//--------------------------------------------------------
+
+
 
 // *******************************************************
 //
@@ -67,19 +66,20 @@ struct tile {
 //     ██       ██   ██    ██████       ██       ██████ 
 // 
 // *******************************************************
-// TODO: Put your function prototypes here
+// Stage 1 Protos
 void print_foliage(struct tile map[MAX_ROW][MAX_COL], int player_row, int player_col);
 void print_branch(struct tile map[MAX_ROW][MAX_COL]);
 void print_bush(struct tile map[MAX_ROW][MAX_COL]);
 
+// Stage 2 Protos
+void spawn_flowers(struct tile map[MAX_ROW][MAX_COL], int player_row, int player_col);
 
 
 
 
-
-//------------------------------------------------------------------------------
+//--------------------------------
 // Provided Function Prototypes
-//------------------------------------------------------------------------------
+//--------------------------------
 
 void initialise_map(struct tile map[MAX_ROW][MAX_COL]);
 void print_map(
@@ -126,9 +126,17 @@ int main(void) {
     print_map(map, player_row, player_col);
 
 
-    // TODO: Stage 1.3 - Add foliage onto the map, starting with branches
+    // Stage 1.3 - Add foliage onto the map, starting with branches
     // Prompt for how many tiles of foliage will be added onto the map.
     print_foliage(map, player_row, player_col);
+
+
+    // stage 2.1
+
+    spawn_flowers(map, player_row, player_col);
+
+
+
 
     return 0;
 }
@@ -225,9 +233,41 @@ void print_bush(struct tile map[MAX_ROW][MAX_COL]) {
 // stage 2 functions *****************************
 // ***********************************************
 
+void spawn_flowers(struct tile map[MAX_ROW][MAX_COL], int player_row, int player_col) {
+    int num_flower;
+    printf("How many flowers: ");
+    scanf("%d", &num_flower);
+    
+    if (num_flower >= 25) {
+        for (int flower_row = 1; flower_row < MAX_ROW; flower_row += 2) {
+            for (int flower_col = 1; flower_col < MAX_COL; flower_col += 2) {
+                if (map[flower_row][flower_col].type == EMPTY) {
+                    map[flower_row][flower_col].type = FLOWER;
+                    map[flower_row][flower_col].flower.state = DORMANT;
+                }
+            }
+        }
+    }
+    else {
+        for (int count = 0; count < num_flower; count++) {
+            int flower_row, flower_col;
+            scanf("%d %d", &flower_row, &flower_col);
 
+            if (flower_row % 2 == 1 && flower_row < MAX_ROW - 1 && 
+                flower_col % 2 == 1 && flower_col < MAX_COL -1 && 
+                map[flower_row][flower_col].type == EMPTY)
+            {
+                map[flower_row][flower_col].type = FLOWER;
+                map[flower_row][flower_col].flower.state = DORMANT;
+            }
+            else {
+                printf("Invalid flower position!\n");
+            }
+        }
+    }
 
-
+    print_map(map, player_row, player_col);
+}
 
 
 
