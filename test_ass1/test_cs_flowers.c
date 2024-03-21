@@ -74,6 +74,7 @@ void print_bush(struct tile map[MAX_ROW][MAX_COL]);
 // Stage 2 Protos
 void spawn_flowers(struct tile map[MAX_ROW][MAX_COL], int player_row, int player_col);
 void move_player(struct tile map[MAX_ROW][MAX_COL], int player_row, int player_col);
+cut(map, player_row, player_col);
 
 
 
@@ -122,22 +123,21 @@ int main(void) {
         printf("Re-enter starting position: ");
         scanf("%d %d", &player_row, &player_col);
     }
-    
     print_map(map, player_row, player_col);
-
-
+    
     // Stage 1.3 - Add foliage onto the map, starting with branches
     // Prompt for how many tiles of foliage will be added onto the map.
     print_foliage(map, player_row, player_col);
 
 
     // stage 2.1
-
     spawn_flowers(map, player_row, player_col);
-
+    
+    // stage 2.2
     move_player(map, player_row, player_col);
 
-
+    // stage 2.3
+    cut(map, player_row, player_col);
 
 
     return 0;
@@ -154,7 +154,6 @@ int main(void) {
 // **********************************************************
 
 // stage 1.3 - 1.4
-
 
 void print_foliage(struct tile map[MAX_ROW][MAX_COL], int player_row, int player_col)
 {
@@ -221,6 +220,7 @@ void print_bush(struct tile map[MAX_ROW][MAX_COL]) {
 
 
 // stage 2.1
+
 void spawn_flowers(struct tile map[MAX_ROW][MAX_COL], int player_row, int player_col) {
     int num_flower;
     printf("How many flowers: ");
@@ -258,6 +258,7 @@ void spawn_flowers(struct tile map[MAX_ROW][MAX_COL], int player_row, int player
 }
 
 // stage 2.2
+
 void move_player(struct tile map[MAX_ROW][MAX_COL], int player_row, int player_col) {
     char mv;
     printf("Game Started!\nEnter command: ");
@@ -306,6 +307,35 @@ void move_player(struct tile map[MAX_ROW][MAX_COL], int player_row, int player_c
         return_val = scanf(" %c", &mv);
     }
 }
+
+// stage 2.3
+
+void cut(struct tile map[MAX_ROW][MAX_COL], int player_row, int player_col) {
+    
+    printf("Enter command: ");
+
+
+
+
+
+    if (cut_row >= 0 && cut_row < MAX_ROW && 
+        cut_col >= 0 && cut_col < MAX_COL && 
+        map[cut_row][cut_col].type == FLOWER) {
+        map[cut_row][cut_col].type = EMPTY;
+    }
+    else {
+        printf("Invalid cut position!\n");
+    }
+
+    print_map(map, player_row, player_col);
+}
+
+
+
+
+
+
+
 
 
 
