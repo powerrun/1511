@@ -73,7 +73,7 @@ void print_bush(struct tile map[MAX_ROW][MAX_COL]);
 
 // Stage 2 Protos
 void spawn_flowers(struct tile map[MAX_ROW][MAX_COL], int player_row, int player_col);
-
+void move_player(struct tile map[MAX_ROW][MAX_COL], int player_row, int player_col);
 
 
 
@@ -135,13 +135,14 @@ int main(void) {
 
     spawn_flowers(map, player_row, player_col);
 
+    move_player(map, player_row, player_col);
+
 
 
 
     return 0;
 }
 
-// **********************************************************
 // **********************************************************
 //
 //     ███████   ██    ██   ███    ██    ██████   ████████
@@ -151,21 +152,9 @@ int main(void) {
 //     ██         ██████    ██   ████    ██████      ██   
 //
 // **********************************************************
-// **********************************************************
 
-// TODO: Put your functions here
+// stage 1.3 - 1.4
 
-// stage 1 functions *****************************
-// ***********************************************
-//
-//        ██       ██████            ██   ██
-//     █████            ██           ██   ██
-//        ██        █████    █████   ███████
-//        ██            ██                ██
-//        ██  ██   ██████                 ██
-//
-// ***********************************************
-// ***********************************************
 
 void print_foliage(struct tile map[MAX_ROW][MAX_COL], int player_row, int player_col)
 {
@@ -230,9 +219,8 @@ void print_bush(struct tile map[MAX_ROW][MAX_COL]) {
     }
 }
 
-// stage 2 functions *****************************
-// ***********************************************
 
+// stage 2.1
 void spawn_flowers(struct tile map[MAX_ROW][MAX_COL], int player_row, int player_col) {
     int num_flower;
     printf("How many flowers: ");
@@ -269,6 +257,55 @@ void spawn_flowers(struct tile map[MAX_ROW][MAX_COL], int player_row, int player
     print_map(map, player_row, player_col);
 }
 
+// stage 2.2
+void move_player(struct tile map[MAX_ROW][MAX_COL], int player_row, int player_col) {
+    char mv;
+    printf("Game Started!\nEnter command: ");
+    int return_val = scanf(" %c", &mv);
+
+    while (return_val == 1) {
+        if (mv == 'w') {
+            if (player_row - 1 >= 0 && 
+                (map[player_row - 1][player_col].type == EMPTY || 
+                map[player_row - 1][player_col].type == BRANCH)) {
+                map[player_row - 1][player_col].type = EMPTY;
+                player_row -= 1;
+            }
+        }
+        else if (mv == 'a') {
+            if (player_col - 1 >= 0 && 
+                (map[player_row][player_col - 1].type == EMPTY || 
+                map[player_row][player_col - 1].type == BRANCH)) {
+                map[player_row][player_col - 1].type = EMPTY;
+                player_col -= 1;
+            }
+        }
+        else if (mv == 's') {
+            if (player_row + 1 <= MAX_ROW - 1 && 
+                (map[player_row + 1][player_col].type == EMPTY || 
+                map[player_row + 1][player_col].type == BRANCH)) {
+                map[player_row + 1][player_col].type = EMPTY;
+                player_row += 1;
+            }
+        }
+        else if (mv == 'd') {
+            if (player_col + 1 <= MAX_COL - 1 && 
+                (map[player_row][player_col + 1].type == EMPTY || 
+                map[player_row][player_col + 1].type == BRANCH)) {
+                map[player_row][player_col + 1].type = EMPTY;
+                player_col += 1;
+            }
+        }
+        else {
+            // stay still
+        }
+
+        print_map(map, player_row, player_col);
+
+        printf("Enter command: ");
+        return_val = scanf(" %c", &mv);
+    }
+}
 
 
 
