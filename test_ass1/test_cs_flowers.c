@@ -55,17 +55,15 @@ struct tile {
 // TODO: Put your structs here 
 
 
+////////////////////////////////
 
 
-// *******************************************************
-//
 //     ██████   ██████     ██████    ████████    ██████ 
 //     ██  ██   ██   ██   ██    ██      ██      ██    ██
 //     ██████   ██████    ██    ██      ██      ██    ██
 //     ██       ██   ██   ██    ██      ██      ██    ██
 //     ██       ██   ██    ██████       ██       ██████ 
 // 
-// *******************************************************
 // Stage 1
 void print_foliage(struct tile map[MAX_ROW][MAX_COL], int player_row, int player_col);
 void print_branch(struct tile map[MAX_ROW][MAX_COL]);
@@ -73,7 +71,11 @@ void print_bush(struct tile map[MAX_ROW][MAX_COL]);
 
 // Stage 2
 void spawn_flowers(struct tile map[MAX_ROW][MAX_COL], int player_row, int player_col);
-void player_action(struct tile map[MAX_ROW][MAX_COL], int player_row, int player_col);
+
+void player_action(struct tile map[MAX_ROW][MAX_COL], int *player_row, int *player_col);
+
+void move_player(struct tile map[MAX_ROW][MAX_COL], int *player_row, int *player_col, char command);
+
 void alerting_flowers(struct tile map[MAX_ROW][MAX_COL], int player_row, int player_col);
 
 
@@ -91,17 +93,14 @@ void print_map(
 void print_tile(struct tile tile);
 void print_flower(struct flower flower);
 
-// ************************************************
-// ************************************************
-//
+
+
 //    ███    ███     █████     ██████    ███    ██ 
 //    ████  ████    ██   ██      ██      ████   ██ 
 //    ██ ████ ██    ███████      ██      ██ ██  ██ 
 //    ██  ██  ██    ██   ██      ██      ██  ██ ██ 
 //    ██      ██    ██   ██    ██████    ██   ████ 
-//
-// ************************************************
-// ************************************************
+
 
 int main(void) {
     struct tile map[MAX_ROW][MAX_COL];
@@ -133,27 +132,18 @@ int main(void) {
     spawn_flowers(map, player_row, player_col);
     
     // stage 2.2 - 2.3
-    player_action(map, player_row, player_col);
+    player_action(map, &player_row, &player_col);
 
 
     return 0;
 }
 
-///////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////
 
-// **********************************************************
-//
 //     ███████   ██    ██   ███    ██    ██████   ████████
 //     ██        ██    ██   ████   ██   ██           ██   
 //     █████     ██    ██   ██ ██  ██   ██           ██   
 //     ██        ██    ██   ██  ██ ██   ██           ██   
 //     ██         ██████    ██   ████    ██████      ██   
-//
-// **********************************************************
 
 // stage 1.3 - 1.4
 
@@ -260,29 +250,62 @@ void spawn_flowers(struct tile map[MAX_ROW][MAX_COL], int player_row, int player
 }
 
 // stage 2.2
-void player_action(struct tile map[MAX_ROW][MAX_COL], int player_row, int player_col) {
+
+void player_action(struct tile map[MAX_ROW][MAX_COL], int *player_row, int *player_col) {
     char command;
     printf("Game Started!\nEnter command: ");
     int return_val = scanf(" %c", &command);
 
-    if (return_val == 1) {
+    while (return_val == 1) {
         move_player(map, player_row, player_col, command);
+        printf("Enter command: ");
+        return_val = scanf(" %c", &command);
+    }
+}
+
+void move_player(struct tile map[MAX_ROW][MAX_COL], int *player_row, int *player_col, char command) {
+    if (command == 'w') {
+        if (*player_row - 1 >= 0 && map[*player_row - 1][*player_col].type == EMPTY) {
+            (*player_row)--;
+        }
+        else if (*player_row - 1 >= 0 && map[*player_row - 1][*player_col].type == BRANCH) {
+            map[*player_row - 1][*player_col].type = EMPTY;
+            (*player_row)--;
+        }
     }
 
+    else if (command == 's') {
+        if (*player_row + 1 < MAX_ROW && map[*player_row + 1][*player_col]. type == EMPTY) {
+            (*player_row)++;
+        }
+        else if (*player_row + 1 < MAX_ROW && map[*player_row + 1][*player_col]. type == BRANCH) {
+            map[*player_row + 1][*player_col].type = EMPTY;
+            (*player_row)++;
+        }
+    }
 
+    else if (command == 'a') {
+        if (*player_col - 1 >= 0 && map[*player_row][*player_col - 1].type == EMPTY) {
+            (*player_col)--;
+        }
+        else if (*player_col - 1 >= 0 && map[*player_row][*player_col - 1].type == BRANCH) {
+            map[*player_row][*player_col - 1].type = EMPTY;
+            (*player_col)--;
+        }
+    }
 
-    print_map(map, player_row, player_col);
+    else if (command == 'd') {
+        if (*player_col + 1 < MAX_COL && map[*player_row][*player_col + 1].type == EMPTY) {
+            (*player_col)++;
+        }
+        else if (*player_col + 1 < MAX_COL && map[*player_row][*player_col + 1].type == BRANCH) {
+            map[*player_row][*player_col + 1].type = EMPTY;
+            (*player_col)++;
+        }
+    }
 
-    printf("Enter command: ");
-    return_val = scanf(" %c", &command);
-
-
+    print_map(map, *player_row, *player_col);
 }
-
-void move_player(struct tile map[MAX_ROW][MAX_COL], int player_row, int player_col, char command) {
-    
-}
-
 
 
 
@@ -413,3 +436,4 @@ void print_flower(struct flower flower) {
         printf("*w*");
     }
 }
+
