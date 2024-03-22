@@ -323,37 +323,40 @@ void player_action(struct tile map[MAX_ROW][MAX_COL], int player_row, int player
             scanf(" %c", &cut_direction);
             
             if (cut_direction == 'w') {
-                if (player_row - 1 >= 0 && 
-                    (map[player_row - 1][player_col].type == BUSH || 
-                    map[player_row - 1][player_col].type == FLOWER)) {
+                if (player_row - 1 >= 0 && map[player_row - 1][player_col].type == BUSH) {
                     map[player_row - 1][player_col].type = EMPTY;
-                    alert = TRUE;
+                }
+                else if (player_row - 1 >= 0 && map[player_row - 1][player_col].type == FLOWER) {
+                    map[player_row - 1][player_col].type = EMPTY;
                 }
             }
             else if (cut_direction == 'a') {
-                if (player_col - 1 >= 0 && 
-                    (map[player_row][player_col - 1].type == BUSH || 
-                    map[player_row][player_col - 1].type == FLOWER)) {
+                if (player_col - 1 >= 0 && map[player_row][player_col - 1].type == BUSH) {
                     map[player_row][player_col - 1].type = EMPTY;
-                    alert = TRUE;
+                }
+                else if (player_col - 1 >= 0 && map[player_row][player_col - 1].type == FLOWER) {
+                    map[player_row][player_col - 1].type = EMPTY;
                 }
             }
             else if (cut_direction == 's') {
-                if (player_row + 1 <= MAX_ROW - 1 && 
-                    (map[player_row + 1][player_col].type == BUSH || 
-                    map[player_row + 1][player_col].type == FLOWER)) {
+                if (player_row + 1 <= MAX_ROW - 1 && map[player_row + 1][player_col].type == BUSH) {
                     map[player_row + 1][player_col].type = EMPTY;
                     alert = TRUE;
                 }
+                else if (player_row + 1 <= MAX_ROW - 1 && map[player_row + 1][player_col].type == FLOWER) {
+                    map[player_row + 1][player_col].type = EMPTY;
+                }
             }
             else if (cut_direction == 'd') {
-                if (player_col + 1 <= MAX_COL - 1 && 
-                    (map[player_row][player_col + 1].type == BUSH || 
-                    map[player_row][player_col + 1].type == FLOWER)) {
+                if (player_col + 1 <= MAX_COL - 1 && map[player_row][player_col + 1].type == BUSH) {
                     map[player_row][player_col + 1].type = EMPTY;
                     alert = TRUE;
                 }
+                else if (player_col + 1 <= MAX_COL - 1 && map[player_row][player_col + 1].type == FLOWER) {
+                    map[player_row][player_col + 1].type = EMPTY;
+                }
             }
+            alert = TRUE;
         }
         else {
             // stay still
