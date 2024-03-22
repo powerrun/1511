@@ -26,3 +26,24 @@
                     map[player_row][player_col + 1].type = EMPTY;
                 }
             }
+
+
+
+
+
+// 2.4
+唤醒
+    for (int alert_row = player_row - 2; alert_row <= player_row + 2; alert_row++) {
+        for (int alert_col = player_col - 2; alert_col <= player_col + 2; alert_col++) {
+            if (alert_row >= 0 && alert_row < MAX_ROW && 
+                alert_col >= 0 && alert_col < MAX_COL && 
+                map[alert_row][alert_col].type == FLOWER) {
+                if (map[alert_row][alert_col].flower.state == DORMANT) {
+                    map[alert_row][alert_col].flower.state = DISTURBED;
+                }
+                else {
+                    map[alert_row][alert_col].flower.state = AWAKENED;
+                }
+            }
+        }
+    }
