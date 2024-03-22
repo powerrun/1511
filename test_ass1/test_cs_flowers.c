@@ -86,7 +86,7 @@ struct position cut_flower(struct tile map[MAX_ROW][MAX_COL], struct position pl
 
 struct tile alert_branch(struct tile map[MAX_ROW][MAX_COL], struct position player);
 
-struct tile alert_flower(struct tile map[MAX_ROW][MAX_COL], struct position player, char command);
+struct tile alert_flower(struct tile map[MAX_ROW][MAX_COL], struct position player);
 
 
 
@@ -278,7 +278,7 @@ void action(struct tile map[MAX_ROW][MAX_COL], struct position player) {
         }
         else {
             player = move_player(map, player, command);
-            alert_flower(map, player, command);
+            alert_flower(map, player);
         }
         print_map(map, player.row, player.col);
 
@@ -395,22 +395,24 @@ struct tile alert_branch(struct tile map[MAX_ROW][MAX_COL], struct position play
     return map[player.row][player.col];
 }
 
-struct tile alert_flower(struct tile map[MAX_ROW][MAX_COL], struct position player, char command)
+struct tile alert_flower(struct tile map[MAX_ROW][MAX_COL], struct position player)
 {
+    char direction;
     int alert_row = -1, alert_col = -1;
-    if (command == 'w') {
+    scanf(" %c", &direction);
+    if (direction == 'w') {
         alert_row = player.row - 1;
         alert_col = player.col;
     }
-    else if (command == 's') {
+    else if (direction == 's') {
         alert_row = player.row + 1;
         alert_col = player.col;
     }
-    else if (command == 'a') {
+    else if (direction == 'a') {
         alert_row = player.row;
         alert_col = player.col - 1;
     }
-    else if (command == 'd') {
+    else if (direction == 'd') {
         alert_row = player.row;
         alert_col = player.col + 1;
     }
