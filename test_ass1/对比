@@ -1,0 +1,28 @@
+            if (command == 'w') {
+                if (player_row - 1 >= 0 && 
+                    (map[player_row - 1][player_col].type == BUSH || 
+                    map[player_row - 1][player_col].type == FLOWER)) {
+                    map[player_row - 1][player_col].type = EMPTY;
+                }
+            }
+            else if (command == 'a') {
+                if (player_col - 1 >= 0 && 
+                    (map[player_row][player_col - 1].type == BUSH || 
+                    map[player_row][player_col - 1].type == FLOWER)) {
+                    map[player_row][player_col - 1].type = EMPTY;
+                }
+            }
+            else if (command == 's') {
+                if (player_row + 1 <= MAX_ROW - 1 && 
+                    (map[player_row + 1][player_col].type == BUSH || 
+                    map[player_row + 1][player_col].type == FLOWER)) {
+                    map[player_row + 1][player_col].type = EMPTY;
+                }
+            }
+            else if (command == 'd') {
+                if (player_col + 1 <= MAX_COL - 1 && 
+                    (map[player_row][player_col + 1].type == BUSH || 
+                    map[player_row][player_col + 1].type == FLOWER)) {
+                    map[player_row][player_col + 1].type = EMPTY;
+                }
+            }

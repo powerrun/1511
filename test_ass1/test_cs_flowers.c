@@ -73,8 +73,8 @@ void print_bush(struct tile map[MAX_ROW][MAX_COL]);
 
 // Stage 2 Protos
 void spawn_flowers(struct tile map[MAX_ROW][MAX_COL], int player_row, int player_col);
-void move_player(struct tile map[MAX_ROW][MAX_COL], int player_row, int player_col);
-void cut(struct tile map[MAX_ROW][MAX_COL], int player_row, int player_col);
+void player_action(struct tile map[MAX_ROW][MAX_COL], int player_row, int player_col);
+// void cut(struct tile map[MAX_ROW][MAX_COL], int player_row, int player_col);
 
 
 //--------------------------------
@@ -133,10 +133,10 @@ int main(void) {
     spawn_flowers(map, player_row, player_col);
     
     // stage 2.2
-    move_player(map, player_row, player_col);
+    player_action(map, player_row, player_col);
 
     // stage 2.3
-    cut(map, player_row, player_col);
+    // cut(map, player_row, player_col);
 
 
     return 0;
@@ -264,14 +264,14 @@ void spawn_flowers(struct tile map[MAX_ROW][MAX_COL], int player_row, int player
 
 // stage 2.2
 
-void move_player(struct tile map[MAX_ROW][MAX_COL], int player_row, int player_col) {
-    char mv;
+void player_action(struct tile map[MAX_ROW][MAX_COL], int player_row, int player_col) {
+    char command, cut_direction;
     printf("Game Started!\nEnter command: ");
-    int return_val = scanf(" %c", &mv);
-    // exit when user press ctrl + d
+    int return_val = scanf(" %c", &command);
+    // will exit when user press ctrl + d
 
     while (return_val == 1) {
-        if (mv == 'w') {
+        if (command == 'w') {
             if (player_row - 1 >= 0 && 
                 (map[player_row - 1][player_col].type == EMPTY || 
                 map[player_row - 1][player_col].type == BRANCH)) {
@@ -279,7 +279,7 @@ void move_player(struct tile map[MAX_ROW][MAX_COL], int player_row, int player_c
                 player_row -= 1;
             }
         }
-        else if (mv == 'a') {
+        else if (command == 'a') {
             if (player_col - 1 >= 0 && 
                 (map[player_row][player_col - 1].type == EMPTY || 
                 map[player_row][player_col - 1].type == BRANCH)) {
@@ -287,7 +287,7 @@ void move_player(struct tile map[MAX_ROW][MAX_COL], int player_row, int player_c
                 player_col -= 1;
             }
         }
-        else if (mv == 's') {
+        else if (command == 's') {
             if (player_row + 1 <= MAX_ROW - 1 && 
                 (map[player_row + 1][player_col].type == EMPTY || 
                 map[player_row + 1][player_col].type == BRANCH)) {
@@ -295,12 +295,46 @@ void move_player(struct tile map[MAX_ROW][MAX_COL], int player_row, int player_c
                 player_row += 1;
             }
         }
-        else if (mv == 'd') {
+        else if (command == 'd') {
             if (player_col + 1 <= MAX_COL - 1 && 
                 (map[player_row][player_col + 1].type == EMPTY || 
                 map[player_row][player_col + 1].type == BRANCH)) {
                 map[player_row][player_col + 1].type = EMPTY;
                 player_col += 1;
+            }
+        }
+
+        // stage 2.3: Cutting Flowers
+        else if (command == 'c') {
+            scanf(" %c", &cut_direction);
+            
+            if (cut_direction == 'w') {
+                if (player_row - 1 >= 0 && 
+                    (map[player_row - 1][player_col].type == BUSH || 
+                    map[player_row - 1][player_col].type == FLOWER)) {
+                    map[player_row - 1][player_col].type = EMPTY;
+                }
+            }
+            else if (cut_direction == 'a') {
+                if (player_col - 1 >= 0 && 
+                    (map[player_row][player_col - 1].type == BUSH || 
+                    map[player_row][player_col - 1].type == FLOWER)) {
+                    map[player_row][player_col - 1].type = EMPTY;
+                }
+            }
+            else if (cut_direction == 's') {
+                if (player_row + 1 <= MAX_ROW - 1 && 
+                    (map[player_row + 1][player_col].type == BUSH || 
+                    map[player_row + 1][player_col].type == FLOWER)) {
+                    map[player_row + 1][player_col].type = EMPTY;
+                }
+            }
+            else if (cut_direction == 'd') {
+                if (player_col + 1 <= MAX_COL - 1 && 
+                    (map[player_row][player_col + 1].type == BUSH || 
+                    map[player_row][player_col + 1].type == FLOWER)) {
+                    map[player_row][player_col + 1].type = EMPTY;
+                }
             }
         }
         else {
@@ -310,77 +344,31 @@ void move_player(struct tile map[MAX_ROW][MAX_COL], int player_row, int player_c
         print_map(map, player_row, player_col);
 
         printf("Enter command: ");
-        return_val = scanf(" %c", &mv);
+        return_val = scanf(" %c", &command);
     }
 }
 
 // stage 2.3
+// void cut(struct tile map[MAX_ROW][MAX_COL], int player_row, int player_col) {
+// /*
+// Stage 2.3 - Cutting Flowers
+// Thanks to the movement command, we can now close the distance between the player and the sleepy flowers. But it's no good getting close to the flowers if we can't deal with them directly. Luckily we have some comically large scissors that are sharp enough to cut through them like butter.
 
-void cut(struct tile map[MAX_ROW][MAX_COL], int player_row, int player_col) {
-/*
-Stage 2.3 - Cutting Flowers
-Thanks to the movement command, we can now close the distance between the player and the sleepy flowers. But it's no good getting close to the flowers if we can't deal with them directly. Luckily we have some comically large scissors that are sharp enough to cut through them like butter.
+// For the cut command, the player will attempt to cut orthogonally adjacent tiles based on the supplied direction.
 
-For the cut command, the player will attempt to cut orthogonally adjacent tiles based on the supplied direction.
+// Enter command: c [direction]
+// w: Cut the tile above the player
+// a: Cut the tile to the left of the player
+// s: Cut the tile below the player
+// d: Cut the tile to the right of the player
+// Here is a diagram of the possible directions that the player can cut in, with the tiles that can be affected highlighted in purple.
 
-Enter command: c [direction]
-w: Cut the tile above the player
-a: Cut the tile to the left of the player
-s: Cut the tile below the player
-d: Cut the tile to the right of the player
-Here is a diagram of the possible directions that the player can cut in, with the tiles that can be affected highlighted in purple.
-
-Just like in Stage 2.2, the type of the tile being cut, affects the behaviour of this command. If the tile's type is BRANCH, EMPTY, or the tile is out of bounds, then nothing happens. Otherwise, if the type is BUSH or FLOWER, then that tile will become an EMPTY tile instead.
-*/
-    printf("Enter command: ");
-    char command;
-    char direction;
-    int return_val = scanf(" %c %c", &command, &direction);
+// Just like in Stage 2.2, the type of the tile being cut, affects the behaviour of this command. If the tile's type is BRANCH, EMPTY, or the tile is out of bounds, then nothing happens. Otherwise, if the type is BUSH or FLOWER, then that tile will become an EMPTY tile instead.
+// */
+//     printf("Enter command: ");
 
 
-    while (return_val = 1 && command == 'c') {
-        if (command == 'c') {
-            if (direction == 'w') {
-                if (player_row - 1 >= 0) {
-                    if (map[player_row - 1][player_col].type == BUSH || 
-                        map[player_row - 1][player_col].type == FLOWER) {
-                        map[player_row - 1][player_col].type = EMPTY;
-                    }
-                }
-            }
-            else if (direction == 'a') {
-                if (player_col - 1 >= 0) {
-                    if (map[player_row][player_col - 1].type == BUSH || 
-                        map[player_row][player_col - 1].type == FLOWER) {
-                        map[player_row][player_col - 1].type = EMPTY;
-                    }
-                }
-            }
-            else if (direction == 's') {
-                if (player_row + 1 <= MAX_ROW - 1) {
-                    if (map[player_row + 1][player_col].type == BUSH || 
-                        map[player_row + 1][player_col].type == FLOWER) {
-                        map[player_row + 1][player_col].type = EMPTY;
-                    }
-                }
-            }
-            else if (direction == 'd') {
-                if (player_col + 1 <= MAX_COL - 1) {
-                    if (map[player_row][player_col + 1].type == BUSH || 
-                        map[player_row][player_col + 1].type == FLOWER) {
-                        map[player_row][player_col + 1].type = EMPTY;
-                    }
-                }
-            }
-        }
-        print_map(map, player_row, player_col);
-        printf("Enter command: ");
-        return_val = scanf(" %c %c", &command, &direction);
-    }
-
-
-
-}
+// }
 
 
 
