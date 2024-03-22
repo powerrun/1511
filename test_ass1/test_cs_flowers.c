@@ -75,7 +75,7 @@ void print_bush(struct tile map[MAX_ROW][MAX_COL]);
 void spawn_flowers(struct tile map[MAX_ROW][MAX_COL], int player_row, int player_col);
 void player_action(struct tile map[MAX_ROW][MAX_COL], int player_row, int player_col);
 void alerting_flowers(struct tile map[MAX_ROW][MAX_COL], int player_row, int player_col);
-
+int move_player(struct tile map[MAX_ROW][MAX_COL], int player_row, int player_col, char command, int alert);
 
 //--------------------------------
 // Provided Function Prototypes
@@ -269,57 +269,57 @@ void player_action(struct tile map[MAX_ROW][MAX_COL], int player_row, int player
     int alert = FALSE;
 
     while (return_val == 1) {
-        if (command == 'w') {
-            if (player_row - 1 >= 0 && 
-                (map[player_row - 1][player_col].type == EMPTY)) {
-                player_row -= 1;
-            }
-            else if (player_row - 1 >= 0 && 
-                map[player_row - 1][player_col].type == BRANCH) {
-                map[player_row - 1][player_col].type = EMPTY;
-                player_row -= 1;
-                alert = TRUE;
-            }
-        }
-        else if (command == 'a') {
-            if (player_col - 1 >= 0 && 
-                (map[player_row][player_col - 1].type == EMPTY)) {
-                player_col -= 1;
-            }
-            else if (player_col - 1 >= 0 && 
-                map[player_row][player_col - 1].type == BRANCH) {
-                map[player_row][player_col - 1].type = EMPTY;
-                player_col -= 1;
-                alert = TRUE;
-            }
-        }
-        else if (command == 's') {
-            if (player_row + 1 <= MAX_ROW - 1 && 
-                (map[player_row + 1][player_col].type == EMPTY)) {
-                player_row += 1;
-            }
-            else if (player_row + 1 <= MAX_ROW - 1 && 
-                map[player_row + 1][player_col].type == BRANCH) {
-                map[player_row + 1][player_col].type = EMPTY;
-                player_row += 1;
-                alert = TRUE;
-            }
-        }
-        else if (command == 'd') {
-            if (player_col + 1 <= MAX_COL - 1 && 
-                (map[player_row][player_col + 1].type == EMPTY)) {
-                player_col += 1;
-            }
-            else if (player_col + 1 <= MAX_COL - 1 && 
-                map[player_row][player_col + 1].type == BRANCH) {
-                map[player_row][player_col + 1].type = EMPTY;
-                player_col += 1;
-                alert = TRUE;
-            }
-        }
+        // if (command == 'w') {
+        //     if (player_row - 1 >= 0 && 
+        //         (map[player_row - 1][player_col].type == EMPTY)) {
+        //         player_row -= 1;
+        //     }
+        //     else if (player_row - 1 >= 0 && 
+        //         map[player_row - 1][player_col].type == BRANCH) {
+        //         map[player_row - 1][player_col].type = EMPTY;
+        //         player_row -= 1;
+        //         alert = TRUE;
+        //     }
+        // }
+        // else if (command == 'a') {
+        //     if (player_col - 1 >= 0 && 
+        //         (map[player_row][player_col - 1].type == EMPTY)) {
+        //         player_col -= 1;
+        //     }
+        //     else if (player_col - 1 >= 0 && 
+        //         map[player_row][player_col - 1].type == BRANCH) {
+        //         map[player_row][player_col - 1].type = EMPTY;
+        //         player_col -= 1;
+        //         alert = TRUE;
+        //     }
+        // }
+        // else if (command == 's') {
+        //     if (player_row + 1 <= MAX_ROW - 1 && 
+        //         (map[player_row + 1][player_col].type == EMPTY)) {
+        //         player_row += 1;
+        //     }
+        //     else if (player_row + 1 <= MAX_ROW - 1 && 
+        //         map[player_row + 1][player_col].type == BRANCH) {
+        //         map[player_row + 1][player_col].type = EMPTY;
+        //         player_row += 1;
+        //         alert = TRUE;
+        //     }
+        // }
+        // else if (command == 'd') {
+        //     if (player_col + 1 <= MAX_COL - 1 && 
+        //         (map[player_row][player_col + 1].type == EMPTY)) {
+        //         player_col += 1;
+        //     }
+        //     else if (player_col + 1 <= MAX_COL - 1 && 
+        //         map[player_row][player_col + 1].type == BRANCH) {
+        //         map[player_row][player_col + 1].type = EMPTY;
+        //         player_col += 1;
+        //         alert = TRUE;
+        //     }
+        // }
 
         // stage 2.3: Cutting Flowers
-        else if (command == 'c') {
+        if (command == 'c') {
             scanf(" %c", &cut_direction);
             
             if (cut_direction == 'w') {
@@ -359,7 +359,12 @@ void player_action(struct tile map[MAX_ROW][MAX_COL], int player_row, int player
             alert = TRUE;
         }
         else {
-            // stay still
+            move_player(map, player_row, player_col, command, alert);
+            // recived return to vars
+            // player_row = move_player(map, player_row, player_col, command, alert);
+            // player_col = move_player(map, player_row, player_col, command, alert);
+            // alert = move_player(map, player_row, player_col, command, alert);
+
         }
 
         // call alerting_flowers
@@ -405,7 +410,71 @@ void alerting_flowers(struct tile map[MAX_ROW][MAX_COL], int player_row, int pla
 
 
 
+int move_player(struct tile map[MAX_ROW][MAX_COL], int player_row, int player_col, char command, int alert) {
+    if (command == 'w') {
+        if (player_row - 1 >= 0 && 
+            (map[player_row - 1][player_col].type == EMPTY)) {
+            player_row -= 1;
+        }
+        else if (player_row - 1 >= 0 && 
+            map[player_row - 1][player_col].type == BRANCH) {
+            map[player_row - 1][player_col].type = EMPTY;
+            player_row -= 1;
+            alert = TRUE;
+        }
+    }
+    else if (command == 'a') {
+        if (player_col - 1 >= 0 && 
+            (map[player_row][player_col - 1].type == EMPTY)) {
+            player_col -= 1;
+        }
+        else if (player_col - 1 >= 0 && 
+            map[player_row][player_col - 1].type == BRANCH) {
+            map[player_row][player_col - 1].type = EMPTY;
+            player_col -= 1;
+            alert = TRUE;
+        }
+    }
+    else if (command == 's') {
+        if (player_row + 1 <= MAX_ROW - 1 && 
+            (map[player_row + 1][player_col].type == EMPTY)) {
+            player_row += 1;
+        }
+        else if (player_row + 1 <= MAX_ROW - 1 && 
+            map[player_row + 1][player_col].type == BRANCH) {
+            map[player_row + 1][player_col].type = EMPTY;
+            player_row += 1;
+            alert = TRUE;
+        }
+    }
+    else if (command == 'd') {
+        if (player_col + 1 <= MAX_COL - 1 && 
+            (map[player_row][player_col + 1].type == EMPTY)) {
+            player_col += 1;
+        }
+        else if (player_col + 1 <= MAX_COL - 1 && 
+            map[player_row][player_col + 1].type == BRANCH) {
+            map[player_row][player_col + 1].type = EMPTY;
+            player_col += 1;
+            alert = TRUE;
+        }
 
+        return player_row, player_col, alert;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+}
 
 
 
