@@ -266,54 +266,61 @@ void player_action(struct tile map[MAX_ROW][MAX_COL], int player_row, int player
     printf("Game Started!\nEnter command: ");
     int return_val = scanf(" %c", &command);
     // will exit when user press ctrl + d
-    int alert = FALSE;
+    int alert = FALSE, alert_row, alert_col;
 
     while (return_val == 1) {
         if (command == 'w') {
             if (player_row - 1 >= 0 && 
                 (map[player_row - 1][player_col].type == EMPTY)) {
-                player_row -= 1;
+                alert_col = player_col;
+                alert_row = player_row -= 1;
             }
             else if (player_row - 1 >= 0 && 
                 map[player_row - 1][player_col].type == BRANCH) {
                 map[player_row - 1][player_col].type = EMPTY;
-                player_row -= 1;
-                alert = TRUE;
+                alert_col = player_col;
+                alert_row = player_row -= 1;
             }
         }
         else if (command == 'a') {
             if (player_col - 1 >= 0 && 
                 (map[player_row][player_col - 1].type == EMPTY)) {
-                player_col -= 1;
+                alert_row = player_row;
+                alert_col = player_col -= 1;
             }
             else if (player_col - 1 >= 0 && 
                 map[player_row][player_col - 1].type == BRANCH) {
                 map[player_row][player_col - 1].type = EMPTY;
-                player_col -= 1;
+                alert_row = player_row;
+                alert_col = player_col -= 1;
                 alert = TRUE;
             }
         }
         else if (command == 's') {
             if (player_row + 1 <= MAX_ROW - 1 && 
                 (map[player_row + 1][player_col].type == EMPTY)) {
-                player_row += 1;
+                alert_col = player_col;
+                alert_row = player_row += 1;
             }
             else if (player_row + 1 <= MAX_ROW - 1 && 
                 map[player_row + 1][player_col].type == BRANCH) {
                 map[player_row + 1][player_col].type = EMPTY;
-                player_row += 1;
+                alert_col = player_col;
+                alert_row = player_row += 1;
                 alert = TRUE;
             }
         }
         else if (command == 'd') {
             if (player_col + 1 <= MAX_COL - 1 && 
                 (map[player_row][player_col + 1].type == EMPTY)) {
-                player_col += 1;
+                alert_row = player_row;
+                alert_col = player_col += 1;
             }
             else if (player_col + 1 <= MAX_COL - 1 && 
                 map[player_row][player_col + 1].type == BRANCH) {
                 map[player_row][player_col + 1].type = EMPTY;
-                player_col += 1;
+                alert_row = player_row;
+                alert_col = player_col += 1;
                 alert = TRUE;
             }
         }
