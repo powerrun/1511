@@ -84,10 +84,9 @@ struct position move_player(struct tile map[MAX_ROW][MAX_COL], struct position p
 
 struct position cut_flower(struct tile map[MAX_ROW][MAX_COL], struct position player);
 
-void alerting_flowers(struct tile map[MAX_ROW][MAX_COL], struct position player);
+struct tile alert_branch(struct tile map[MAX_ROW][MAX_COL], struct position player);
 
-
-
+struct tile alert_flower(struct tile map[MAX_ROW][MAX_COL], struct position player, char command);
 
 
 
@@ -275,9 +274,11 @@ void action(struct tile map[MAX_ROW][MAX_COL], struct position player) {
     while (return_val == 1) {
         if (command == 'c') {
             player = cut_flower(map, player);
+            alert_branch(map, player);
         }
         else {
             player = move_player(map, player, command);
+            alert_flower(map, player, command);
         }
         print_map(map, player.row, player.col);
 
@@ -372,17 +373,67 @@ struct position cut_flower(struct tile map[MAX_ROW][MAX_COL], struct position pl
     return player;
 }
 
+// 2.4
+struct tile alert_branch(struct tile map[MAX_ROW][MAX_COL], struct position player) {
+    if (map[player.row][player.col].type == BRANCH) {
+        for (int alert_row = player.row - 2; alert_row <= player.row + 2; alert_row++) {
+            for (int alert_col = player.col - 2; alert_col <= player.row + 2; alert_col++) {
+                if (alert_row >= 0 && alert_row < MAX_ROW && alert_col >= 0 && 
+                    alert_col < MAX_COL && map[alert_row][alert_col].type == FLOWER ) 
+                {
+                    if (map[alert_row][alert_col].flower.state == DORMANT) {
+                        map[alert_row][alert_col].flower.state = DISTURBED;
+                    }
+                    else if (map[alert_row][alert_col].flower.state == DISTURBED) {
+                        map[alert_row][alert_col].flower.state = AWAKENED;
+                    }
+                }
+            }
+        }
+    }
 
+    return map[player.row][player.col];
+}
 
+struct tile alert_flower(struct tile map[MAX_ROW][MAX_COL], struct position player, char command)
+{
+    int alert_row = -1, alert_col = -1;
+    if (command == 'w') {
+        alert_row = player.row - 1;
+        alert_col = player.col;
+    }
+    else if (command == 's') {
+        alert_row = player.row + 1;
+        alert_col = player.col;
+    }
+    else if (command == 'a') {
+        alert_row = player.row;
+        alert_col = player.col - 1;
+    }
+    else if (command == 'd') {
+        alert_row = player.row;
+        alert_col = player.col + 1;
+    }
 
+    if (map[alert_row][alert_col].type == FLOWER) {
+        for (alert_row = alert_row - 2; alert_row <= player.row + 2; alert_row++) {
+            for (alert_col = player.col - 2; alert_col <= player.row + 2; alert_col++) {
+                if (alert_row >= 0 && alert_row < MAX_ROW && alert_col >= 0 && 
+                    alert_col < MAX_COL && map[alert_row][alert_col].type == FLOWER ) 
+                {
+                    if (map[alert_row][alert_col].flower.state == DORMANT) {
+                        map[alert_row][alert_col].flower.state = DISTURBED;
+                    }
+                    else if (map[alert_row][alert_col].flower.state == DISTURBED) {
+                        map[alert_row][alert_col].flower.state = AWAKENED;
+                    }
+                }
+            }
+        }
+    }
 
-
-
-
-
-
-
-
+    return map[player.row][player.col];
+}
 
 
 
