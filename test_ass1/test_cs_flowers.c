@@ -259,158 +259,29 @@ void spawn_flowers(struct tile map[MAX_ROW][MAX_COL], int player_row, int player
     print_map(map, player_row, player_col);
 }
 
-// stage 2.2 - 2.4
-
+// stage 2.2
 void player_action(struct tile map[MAX_ROW][MAX_COL], int player_row, int player_col) {
-    char command, cut_direction;
+    char command;
     printf("Game Started!\nEnter command: ");
     int return_val = scanf(" %c", &command);
-    // will exit when user press ctrl + d
-    int alert = FALSE, alert_row, alert_col;
 
-    while (return_val == 1) {
-        if (command == 'w') {
-            if (player_row - 1 >= 0 && 
-                (map[player_row - 1][player_col].type == EMPTY)) {
-                alert_col = player_col;
-                alert_row = player_row -= 1;
-            }
-            else if (player_row - 1 >= 0 && 
-                map[player_row - 1][player_col].type == BRANCH) {
-                map[player_row - 1][player_col].type = EMPTY;
-                alert_col = player_col;
-                alert_row = player_row -= 1;
-            }
-        }
-        else if (command == 'a') {
-            if (player_col - 1 >= 0 && 
-                (map[player_row][player_col - 1].type == EMPTY)) {
-                alert_row = player_row;
-                alert_col = player_col -= 1;
-            }
-            else if (player_col - 1 >= 0 && 
-                map[player_row][player_col - 1].type == BRANCH) {
-                map[player_row][player_col - 1].type = EMPTY;
-                alert_row = player_row;
-                alert_col = player_col -= 1;
-                alert = TRUE;
-            }
-        }
-        else if (command == 's') {
-            if (player_row + 1 <= MAX_ROW - 1 && 
-                (map[player_row + 1][player_col].type == EMPTY)) {
-                alert_col = player_col;
-                alert_row = player_row += 1;
-            }
-            else if (player_row + 1 <= MAX_ROW - 1 && 
-                map[player_row + 1][player_col].type == BRANCH) {
-                map[player_row + 1][player_col].type = EMPTY;
-                alert_col = player_col;
-                alert_row = player_row += 1;
-                alert = TRUE;
-            }
-        }
-        else if (command == 'd') {
-            if (player_col + 1 <= MAX_COL - 1 && 
-                (map[player_row][player_col + 1].type == EMPTY)) {
-                alert_row = player_row;
-                alert_col = player_col += 1;
-            }
-            else if (player_col + 1 <= MAX_COL - 1 && 
-                map[player_row][player_col + 1].type == BRANCH) {
-                map[player_row][player_col + 1].type = EMPTY;
-                alert_row = player_row;
-                alert_col = player_col += 1;
-                alert = TRUE;
-            }
-        }
-
-        // stage 2.3: Cutting Flowers
-        else if (command == 'c') {
-            scanf(" %c", &cut_direction);
-            
-            if (cut_direction == 'w') {
-                if (player_row - 1 >= 0 && map[player_row - 1][player_col].type == BUSH) {
-                    map[player_row - 1][player_col].type = EMPTY;
-                }
-                else if (player_row - 1 >= 0 && map[player_row - 1][player_col].type == FLOWER) {
-                    map[player_row - 1][player_col].type = EMPTY;
-                }
-            }
-            else if (cut_direction == 'a') {
-                if (player_col - 1 >= 0 && map[player_row][player_col - 1].type == BUSH) {
-                    map[player_row][player_col - 1].type = EMPTY;
-                }
-                else if (player_col - 1 >= 0 && map[player_row][player_col - 1].type == FLOWER) {
-                    map[player_row][player_col - 1].type = EMPTY;
-                }
-            }
-            else if (cut_direction == 's') {
-                if (player_row + 1 <= MAX_ROW - 1 && map[player_row + 1][player_col].type == BUSH) {
-                    map[player_row + 1][player_col].type = EMPTY;
-                    alert = TRUE;
-                }
-                else if (player_row + 1 <= MAX_ROW - 1 && map[player_row + 1][player_col].type == FLOWER) {
-                    map[player_row + 1][player_col].type = EMPTY;
-                }
-            }
-            else if (cut_direction == 'd') {
-                if (player_col + 1 <= MAX_COL - 1 && map[player_row][player_col + 1].type == BUSH) {
-                    map[player_row][player_col + 1].type = EMPTY;
-                    alert = TRUE;
-                }
-                else if (player_col + 1 <= MAX_COL - 1 && map[player_row][player_col + 1].type == FLOWER) {
-                    map[player_row][player_col + 1].type = EMPTY;
-                }
-            }
-            alert = TRUE;
-        }
-        else {
-            // stay still
-        }
-
-        // call alerting_flowers
-        if (alert == TRUE) {
-            alerting_flowers(map, player_row, player_col);
-            alert = FALSE;
-        }
-
-        print_map(map, player_row, player_col);
-
-        printf("Enter command: ");
-        return_val = scanf(" %c", &command);
+    if (return_val == 1) {
+        move_player(map, player_row, player_col, command);
     }
-}
 
-// stage 2.4: Alerting Flowers
-void alerting_flowers(struct tile map[MAX_ROW][MAX_COL], int player_row, int player_col) {
-    // Calculate alert boundaries
-    int min_alert_row, max_alert_row, min_alert_col, max_alert_col;
-    min_alert_row = player_row - 2;
-    min_alert_col = player_col - 2;
-    max_alert_row = player_row + 2;
-    max_alert_col = player_col + 2;
 
-    // Alerting flowers
-    for (int alert_row = min_alert_row; alert_row <= max_alert_row; alert_row++) {
-        for (int alert_col = min_alert_col; alert_col <= max_alert_col; alert_col++) {
-            if (alert_row >= 0 && alert_row < MAX_ROW && alert_col >= 0 && alert_col < MAX_COL && 
-                map[alert_row][alert_col].type == FLOWER) 
-            {
-                if (map[alert_row][alert_col].flower.state == DORMANT) {
-                    map[alert_row][alert_col].flower.state = DISTURBED;
-                }
-                else {
-                    map[alert_row][alert_col].flower.state = AWAKENED;
-                }
-            }
-        }
-    }
+
+    print_map(map, player_row, player_col);
+
+    printf("Enter command: ");
+    return_val = scanf(" %c", &command);
 
 
 }
 
-
+void move_player(struct tile map[MAX_ROW][MAX_COL], int player_row, int player_col, char command) {
+    
+}
 
 
 
