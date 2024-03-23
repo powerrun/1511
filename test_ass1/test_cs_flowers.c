@@ -89,7 +89,7 @@ struct result cut_flower(struct tile map[MAX_ROW][MAX_COL], struct result result
 void alert(struct tile map[MAX_ROW][MAX_COL], int alert_row, int alert_col);
 
 // Stage 3
-int check_game_status(struct tile map[MAX_ROW][MAX_COL], int player_alive, int game_alive);
+void check_game_status(struct tile map[MAX_ROW][MAX_COL], int player_alive, int game_alive);
 
 
 
@@ -146,7 +146,6 @@ int main(void) {
     // Stage 1.3 - Add foliage onto the map, starting with branches
     // Prompt for how many tiles of foliage will be added onto the map.
     print_foliage(map, result);
-
 
     // stage 2.1
     spawn_flowers(map, result);
@@ -286,7 +285,7 @@ struct result action(struct tile map[MAX_ROW][MAX_COL], struct result result) {
         print_map(map, result.player_row, result.player_col);
 
         // check game status and decide whether to continue
-        result.game_alive = check_game_status(map, result.player_alive, result.game_alive);
+        check_game_status(map, result.player_alive, result.game_alive);
         if (result.game_alive == TRUE) {
             printf("Enter command: ");
             return_val = scanf(" %c", &command);
@@ -426,7 +425,7 @@ Assumptions / Restrictions / Clarifications
 If both the player and all flowers have been eliminated, then the game is considered lost.
 */
 
-int check_game_status(struct tile map[MAX_ROW][MAX_COL], 
+void check_game_status(struct tile map[MAX_ROW][MAX_COL], 
                       int player_alive, int game_alive) 
 {
     int num_flower = 0;
@@ -444,7 +443,8 @@ int check_game_status(struct tile map[MAX_ROW][MAX_COL],
         printf("The flowers have beaten us, and UNSW is lost forever!\n");
     }
 
-    return game_alive;
+    exit(1);
+    // return game_alive;
 }
 
 
