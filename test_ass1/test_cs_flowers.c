@@ -54,10 +54,12 @@ struct tile {
 
 // TODO: Put your structs here 
 
-struct position
+struct result
 {
-    int row;
-    int col;
+    int player_row;
+    int player_col;
+    int alert_row;
+    int alert_col;
 };
 
 
@@ -71,23 +73,22 @@ struct position
 //     ██       ██   ██    ██████       ██       ██████ 
 // 
 // Stage 1
-void print_foliage(struct tile map[MAX_ROW][MAX_COL], struct position player);
+void print_foliage(struct tile map[MAX_ROW][MAX_COL], struct result result);
 void print_branch(struct tile map[MAX_ROW][MAX_COL]);
 void print_bush(struct tile map[MAX_ROW][MAX_COL]);
 
 // Stage 2
-void spawn_flowers(struct tile map[MAX_ROW][MAX_COL], struct position player);
+void spawn_flowers(struct tile map[MAX_ROW][MAX_COL], struct result result);
 
-void action(struct tile map[MAX_ROW][MAX_COL], struct position player);
+void action(struct tile map[MAX_ROW][MAX_COL], struct result result);
 
-struct position move_player(struct tile map[MAX_ROW][MAX_COL], struct position player, char command);
+struct result move_player(struct tile map[MAX_ROW][MAX_COL], struct result result, char command);
 
-struct position cut_flower(struct tile map[MAX_ROW][MAX_COL], struct position player);
+struct result cut_flower(struct tile map[MAX_ROW][MAX_COL], struct result result);
 
-struct tile alert_branch(struct tile map[MAX_ROW][MAX_COL], struct position player);
+struct tile alert_branch(struct tile map[MAX_ROW][MAX_COL], struct result result);
 
-struct tile alert_flower(struct tile map[MAX_ROW][MAX_COL], struct position player);
-
+struct tile alert_flower(struct tile map[MAX_ROW][MAX_COL], struct result result);
 
 
 
@@ -118,7 +119,9 @@ void print_flower(struct flower flower);
 
 int main(void) {
     struct tile map[MAX_ROW][MAX_COL];
-    struct position player;
+    struct result result;
+    result.alert_row = 0; // initialize alert result
+    result.alert_col = 0;
     initialise_map(map);
     
     printf("Welcome to CS Flowers!\n");
@@ -126,28 +129,28 @@ int main(void) {
     // Stage 1.1: Scan in the player position and print out the map
     printf("Player's starting position: ");
     
-    scanf("%d %d", &player.row, &player.col);
+    scanf("%d %d", &result.player_row, &result.player_col);
 
     // Stage 1.2: Validate the player's spawn and re-scan if invalid
     // write boolean expression for when the position is invalid
-    while (player.row > 0 && player.row < MAX_ROW - 1 &&
-           player.col > 0 && player.col < MAX_COL - 1) {
+    while (result.player_row > 0 && result.player_row < MAX_ROW - 1 &&
+           result.player_col > 0 && result.player_col < MAX_COL - 1) {
         printf("Invalid starting position!\n");
         printf("Re-enter starting position: ");
-        scanf("%d %d", &player.row, &player.col);
+        scanf("%d %d", &result.player_row, &result.player_col);
     }
-    print_map(map, player.row, player.col);
+    print_map(map, result.player_row, result.player_col);
     
     // Stage 1.3 - Add foliage onto the map, starting with branches
     // Prompt for how many tiles of foliage will be added onto the map.
-    print_foliage(map, player);
+    print_foliage(map, result);
 
 
     // stage 2.1
-    spawn_flowers(map, player);
+    spawn_flowers(map, result);
     
     // stage 2.2 - 2.3
-    action(map, player);
+    action(map, result);
 
 
     return 0;
@@ -162,7 +165,7 @@ int main(void) {
 
 // stage 1.3 - 1.4
 
-void print_foliage(struct tile map[MAX_ROW][MAX_COL], struct position player)
+void print_foliage(struct tile map[MAX_ROW][MAX_COL], struct result result)
 {
     char foliage_type = ' ';
     int num_foliage;
@@ -184,7 +187,7 @@ void print_foliage(struct tile map[MAX_ROW][MAX_COL], struct position player)
             print_bush(map);
         }
     }
-    print_map(map, player.row, player.col);
+    print_map(map, result.player_row, result.player_col);
 }
 
 void print_branch(struct tile map[MAX_ROW][MAX_COL]) {
@@ -228,7 +231,7 @@ void print_bush(struct tile map[MAX_ROW][MAX_COL]) {
 
 // stage 2.1
 
-void spawn_flowers(struct tile map[MAX_ROW][MAX_COL], struct position player) {
+void spawn_flowers(struct tile map[MAX_ROW][MAX_COL], struct result result) {
     int num_flower;
     printf("How many flowers: ");
     scanf("%d", &num_flower);
@@ -261,180 +264,186 @@ void spawn_flowers(struct tile map[MAX_ROW][MAX_COL], struct position player) {
         }
     }
 
-    print_map(map, player.row, player.col);
+    print_map(map, result.player_row, result.player_col);
 }
 
 // stage 2.2
 
-void action(struct tile map[MAX_ROW][MAX_COL], struct position player) {
+void action(struct tile map[MAX_ROW][MAX_COL], struct result result) {
     char command;
     printf("Game Started!\nEnter command: ");
     int return_val = scanf(" %c", &command);
 
     while (return_val == 1) {
         if (command == 'c') {
-            player = cut_flower(map, player);
-            alert_branch(map, player);
+            result = cut_flower(map, result);
+            // alert_flower(map, result);
         }
         else {
-            player = move_player(map, player, command);
-            alert_flower(map, player);
+            result = move_player(map, result, command);
+            // alert_branch(map, result);
         }
-        print_map(map, player.row, player.col);
+        print_map(map, result.player_row, result.player_col);
 
         printf("Enter command: ");
         return_val = scanf(" %c", &command);
     }
 }
 
-struct position move_player(struct tile map[MAX_ROW][MAX_COL], struct position player, char command) {
+struct result move_player(struct tile map[MAX_ROW][MAX_COL], struct result result, char command) {
     if (command == 'w') {
-        if (player.row - 1 >= 0 && map[player.row - 1][player.col].type == EMPTY) {
-            player.row--;
+        if (result.player_row - 1 >= 0 && map[result.player_row - 1][result.player_col].type == EMPTY) {
+            result.player_row--;
         }
-        else if (player.row - 1 >= 0 && map[player.row - 1][player.col].type == BRANCH) {
-            map[player.row - 1][player.col].type = EMPTY;
-            player.row--;
+        else if (result.player_row - 1 >= 0 && map[result.player_row - 1][result.player_col].type == BRANCH) {
+            map[result.player_row - 1][result.player_col].type = EMPTY;
+            result.player_row--;
+            alert_branch(map, result);
         }
     }
-
     else if (command == 's') {
-        if (player.row + 1 < MAX_ROW && map[player.row + 1][player.col].type == EMPTY) {
-            player.row++;
+        if (result.player_row + 1 < MAX_ROW && map[result.player_row + 1][result.player_col].type == EMPTY) {
+            result.player_row++;
         }
-        else if (player.row + 1 < MAX_ROW && map[player.row + 1][player.col].type == BRANCH) {
-            map[player.row + 1][player.col].type = EMPTY;
-            player.row++;
+        else if (result.player_row + 1 < MAX_ROW && map[result.player_row + 1][result.player_col].type == BRANCH) {
+            map[result.player_row + 1][result.player_col].type = EMPTY;
+            result.player_row++;
+            alert_branch(map, result);
         }
     }
-
     else if (command == 'a') {
-        if (player.col - 1 >= 0 && map[player.row][player.col - 1].type == EMPTY) {
-            player.col--;
+        if (result.player_col - 1 >= 0 && map[result.player_row][result.player_col - 1].type == EMPTY) {
+            result.player_col--;
         }
-        else if (player.col - 1 >= 0 && map[player.row][player.col - 1].type == BRANCH) {
-            map[player.row][player.col - 1].type = EMPTY;
-            player.col--;
+        else if (result.player_col - 1 >= 0 && map[result.player_row][result.player_col - 1].type == BRANCH) {
+            map[result.player_row][result.player_col - 1].type = EMPTY;
+            result.player_col--;
+            alert_branch(map, result);
         }
     }
-
     else if (command == 'd') {
-        if (player.col + 1 < MAX_COL && map[player.row][player.col + 1].type == EMPTY) {
-            player.col++;
+        if (result.player_col + 1 < MAX_COL && map[result.player_row][result.player_col + 1].type == EMPTY) {
+            result.player_col++;
         }
-        else if (player.col + 1 < MAX_COL && map[player.row][player.col + 1].type == BRANCH) {
-            map[player.row][player.col + 1].type = EMPTY;
-            player.col++;
+        else if (result.player_col + 1 < MAX_COL && map[result.player_row][result.player_col + 1].type == BRANCH) {
+            map[result.player_row][result.player_col + 1].type = EMPTY;
+            result.player_col++;
+            alert_branch(map, result);
         }
     }
 
-    return player;
+    return result;
 }
 
-struct position cut_flower(struct tile map[MAX_ROW][MAX_COL], struct position player) {
+struct result cut_flower(struct tile map[MAX_ROW][MAX_COL], struct result result) {
     char command;
     scanf(" %c", &command);
     if (command == 'w') {
-        if (player.row - 1 >= 0 && map[player.row - 1][player.col].type == FLOWER) {
-            map[player.row - 1][player.col].type = EMPTY;
+        if (result.player_row - 1 >= 0 && map[result.player_row - 1][result.player_col].type == FLOWER) {
+            map[result.player_row - 1][result.player_col].type = EMPTY;
+            alert_flower(map, result);            
         }
-        else if (player.row - 1 >= 0 && map[player.row - 1][player.col].type == BUSH) {
-            map[player.row - 1][player.col].type = EMPTY;
+        else if (result.player_row - 1 >= 0 && map[result.player_row - 1][result.player_col].type == BUSH) {
+            map[result.player_row - 1][result.player_col].type = EMPTY;
         }
     }
 
     else if (command == 's') {
-        if (player.row + 1 < MAX_ROW && map[player.row + 1][player.col].type == FLOWER) {
-            map[player.row + 1][player.col].type = EMPTY;
+        if (result.player_row + 1 < MAX_ROW && map[result.player_row + 1][result.player_col].type == FLOWER) {
+            map[result.player_row + 1][result.player_col].type = EMPTY;
+            alert_flower(map, result);
         }
-        else if (player.row + 1 < MAX_ROW && map[player.row + 1][player.col].type == BUSH) {
-            map[player.row + 1][player.col].type = EMPTY;
+        else if (result.player_row + 1 < MAX_ROW && map[result.player_row + 1][result.player_col].type == BUSH) {
+            map[result.player_row + 1][result.player_col].type = EMPTY;
         }
     }
 
     else if (command == 'a') {
-        if (player.col - 1 >= 0 && map[player.row][player.col - 1].type == FLOWER) {
-            map[player.row][player.col - 1].type = EMPTY;
+        if (result.player_col - 1 >= 0 && map[result.player_row][result.player_col - 1].type == FLOWER) {
+            map[result.player_row][result.player_col - 1].type = EMPTY;
+            alert_flower(map, result);
         }
-        else if (player.col - 1 >= 0 && map[player.row][player.col - 1].type == BUSH) {
-            map[player.row][player.col - 1].type = EMPTY;
+        else if (result.player_col - 1 >= 0 && map[result.player_row][result.player_col - 1].type == BUSH) {
+            map[result.player_row][result.player_col - 1].type = EMPTY;
         }
     }
 
     else if (command == 'd') {
-        if (player.col + 1 < MAX_COL && map[player.row][player.col + 1].type == FLOWER) {
-            map[player.row][player.col + 1].type = EMPTY;
+        if (result.player_col + 1 < MAX_COL && map[result.player_row][result.player_col + 1].type == FLOWER) {
+            map[result.player_row][result.player_col + 1].type = EMPTY;
+            alert_flower(map, result);
         }
-        else if (player.col + 1 < MAX_COL && map[player.row][player.col + 1].type == BUSH) {
-            map[player.row][player.col + 1].type = EMPTY;
+        else if (result.player_col + 1 < MAX_COL && map[result.player_row][result.player_col + 1].type == BUSH) {
+            map[result.player_row][result.player_col + 1].type = EMPTY;
         }
     }
 
-    return player;
+    return result;
 }
 
 // 2.4
-struct tile alert_branch(struct tile map[MAX_ROW][MAX_COL], struct position player) {
-    if (map[player.row][player.col].type == BRANCH) {
-        for (int alert_row = player.row - 2; alert_row <= player.row + 2; alert_row++) {
-            for (int alert_col = player.col - 2; alert_col <= player.row + 2; alert_col++) {
-                if (alert_row >= 0 && alert_row < MAX_ROW && alert_col >= 0 && 
-                    alert_col < MAX_COL && map[alert_row][alert_col].type == FLOWER ) 
+struct tile alert_branch(struct tile map[MAX_ROW][MAX_COL], struct result result) {
+    if (map[result.player_row][result.player_col].type == BRANCH) {
+        for (result.alert_row = result.player_row - 2; result.alert_row <= result.player_row + 2; result.alert_row++) {
+            for (result.alert_col = result.player_col - 2; result.alert_col <= result.player_row + 2; result.alert_col++) {
+                if (result.alert_row >= 0 && result.alert_row < MAX_ROW && 
+                    result.alert_col >= 0 && result.alert_col < MAX_COL && 
+                    map[result.alert_row][result.alert_col].type == FLOWER) 
                 {
-                    if (map[alert_row][alert_col].flower.state == DORMANT) {
-                        map[alert_row][alert_col].flower.state = DISTURBED;
+                    if (map[result.alert_row][result.alert_col].flower.state == DORMANT) {
+                        map[result.alert_row][result.alert_col].flower.state = DISTURBED;
                     }
-                    else if (map[alert_row][alert_col].flower.state == DISTURBED) {
-                        map[alert_row][alert_col].flower.state = AWAKENED;
+                    else if (map[result.alert_row][result.alert_col].flower.state == DISTURBED) {
+                        map[result.alert_row][result.alert_col].flower.state = AWAKENED;
                     }
                 }
             }
         }
     }
 
-    return map[player.row][player.col];
+    return map[result.alert_row][result.alert_col];
 }
 
-struct tile alert_flower(struct tile map[MAX_ROW][MAX_COL], struct position player)
+struct tile alert_flower(struct tile map[MAX_ROW][MAX_COL], struct result result)
 {
     char direction;
-    int alert_row = -1, alert_col = -1;
     scanf(" %c", &direction);
     if (direction == 'w') {
-        alert_row = player.row - 1;
-        alert_col = player.col;
+        result.alert_row = result.player_row - 1;
+        result.alert_col = result.player_col;
     }
     else if (direction == 's') {
-        alert_row = player.row + 1;
-        alert_col = player.col;
+        result.alert_row = result.player_row + 1;
+        result.alert_col = result.player_col;
     }
     else if (direction == 'a') {
-        alert_row = player.row;
-        alert_col = player.col - 1;
+        result.alert_row = result.player_row;
+        result.alert_col = result.player_col - 1;
     }
     else if (direction == 'd') {
-        alert_row = player.row;
-        alert_col = player.col + 1;
+        result.alert_row = result.player_row;
+        result.alert_col = result.player_col + 1;
     }
 
-    if (map[alert_row][alert_col].type == FLOWER) {
-        for (alert_row = alert_row - 2; alert_row <= player.row + 2; alert_row++) {
-            for (alert_col = player.col - 2; alert_col <= player.row + 2; alert_col++) {
-                if (alert_row >= 0 && alert_row < MAX_ROW && alert_col >= 0 && 
-                    alert_col < MAX_COL && map[alert_row][alert_col].type == FLOWER ) 
+    if (map[result.alert_row][result.alert_col].type == FLOWER) {
+        for (result.alert_row = result.alert_row - 2; result.alert_row <= result.player_row + 2; result.alert_row++) {
+            for (result.alert_col = result.player_col - 2; result.alert_col <= result.player_row + 2; result.alert_col++) {
+                if (result.alert_row >= 0 && result.alert_row < MAX_ROW && 
+                    result.alert_col >= 0 && result.alert_col < MAX_COL && 
+                    map[result.alert_row][result.alert_col].type == FLOWER ) 
                 {
-                    if (map[alert_row][alert_col].flower.state == DORMANT) {
-                        map[alert_row][alert_col].flower.state = DISTURBED;
+                    if (map[result.alert_row][result.alert_col].flower.state == DORMANT) {
+                        map[result.alert_row][result.alert_col].flower.state = DISTURBED;
                     }
-                    else if (map[alert_row][alert_col].flower.state == DISTURBED) {
-                        map[alert_row][alert_col].flower.state = AWAKENED;
+                    else if (map[result.alert_row][result.alert_col].flower.state == DISTURBED) {
+                        map[result.alert_row][result.alert_col].flower.state = AWAKENED;
                     }
                 }
             }
         }
     }
 
-    return map[player.row][player.col];
+    return map[result.alert_row][result.alert_col];
 }
 
 
