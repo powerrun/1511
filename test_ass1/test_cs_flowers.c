@@ -441,9 +441,9 @@ void check_game_status(struct tile map[MAX_ROW][MAX_COL],
     }
     else if (player_alive == FALSE) {
         printf("The flowers have beaten us, and UNSW is lost forever!\n");
+        exit(1);
     }
 
-    exit(1);
     // return game_alive;
 }
 
