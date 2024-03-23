@@ -195,3 +195,60 @@ void alerting_flowers(struct tile map[MAX_ROW][MAX_COL], int player_row, int pla
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// alert 统一一个函数
+
+        for (result.alert_row = result.player_row - 2; result.alert_row <= result.player_row + 2; result.alert_row++) {
+            for (result.alert_col = result.player_col - 2; result.alert_col <= result.player_row + 2; result.alert_col++) {
+                if (result.alert_row >= 0 && result.alert_row < MAX_ROW && 
+                    result.alert_col >= 0 && result.alert_col < MAX_COL && 
+                    map[result.alert_row][result.alert_col].type == FLOWER) 
+                {
+                    if (map[result.alert_row][result.alert_col].flower.state == DORMANT) {
+                        map[result.alert_row][result.alert_col].flower.state = DISTURBED;
+                    }
+                    else if (map[result.alert_row][result.alert_col].flower.state == DISTURBED) {
+                        map[result.alert_row][result.alert_col].flower.state = AWAKENED;
+                    }
+                }
+            }
+        }
+
+
+// 花，alert之前先计算alert中心
+    char direction;
+    scanf(" %c", &direction);
+    if (direction == 'w') {
+        result.alert_row = result.player_row - 1;
+        result.alert_col = result.player_col;
+    }
+    else if (direction == 's') {
+        result.alert_row = result.player_row + 1;
+        result.alert_col = result.player_col;
+    }
+    else if (direction == 'a') {
+        result.alert_row = result.player_row;
+        result.alert_col = result.player_col - 1;
+    }
+    else if (direction == 'd') {
+        result.alert_row = result.player_row;
+        result.alert_col = result.player_col + 1;
+    }

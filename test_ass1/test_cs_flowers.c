@@ -86,12 +86,7 @@ struct result move_player(struct tile map[MAX_ROW][MAX_COL], struct result resul
 
 struct result cut_flower(struct tile map[MAX_ROW][MAX_COL], struct result result);
 
-struct tile alert_branch(struct tile map[MAX_ROW][MAX_COL], struct result result);
-
-struct tile alert_flower(struct tile map[MAX_ROW][MAX_COL], struct result result);
-
-
-
+void alert(struct tile map[MAX_ROW][MAX_COL], int alert_row, int alert_col);
 
 
 //--------------------------------
@@ -120,7 +115,9 @@ void print_flower(struct flower flower);
 int main(void) {
     struct tile map[MAX_ROW][MAX_COL];
     struct result result;
-    result.alert_row = 0; // initialize alert result
+    
+    // initialize result and map
+    result.alert_row = 0;
     result.alert_col = 0;
     initialise_map(map);
     
@@ -277,11 +274,9 @@ void action(struct tile map[MAX_ROW][MAX_COL], struct result result) {
     while (return_val == 1) {
         if (command == 'c') {
             result = cut_flower(map, result);
-            // alert_flower(map, result);
         }
         else {
             result = move_player(map, result, command);
-            // alert_branch(map, result);
         }
         print_map(map, result.player_row, result.player_col);
 
@@ -292,13 +287,14 @@ void action(struct tile map[MAX_ROW][MAX_COL], struct result result) {
 
 struct result move_player(struct tile map[MAX_ROW][MAX_COL], struct result result, char command) {
     if (command == 'w') {
-        if (result.player_row - 1 >= 0 && map[result.player_row - 1][result.player_col].type == EMPTY) {
+        if (result.player_row - 1 >= 0 && 
+            map[result.player_row - 1][result.player_col].type == EMPTY) {
             result.player_row--;
         }
         else if (result.player_row - 1 >= 0 && map[result.player_row - 1][result.player_col].type == BRANCH) {
-            map[result.player_row - 1][result.player_col].type = EMPTY;
             result.player_row--;
-            alert_branch(map, result);
+            map[result.player_row][result.player_col].type = EMPTY;
+            alert(map, result.player_row, result.player_col);
         }
     }
     else if (command == 's') {
@@ -306,9 +302,9 @@ struct result move_player(struct tile map[MAX_ROW][MAX_COL], struct result resul
             result.player_row++;
         }
         else if (result.player_row + 1 < MAX_ROW && map[result.player_row + 1][result.player_col].type == BRANCH) {
-            map[result.player_row + 1][result.player_col].type = EMPTY;
             result.player_row++;
-            alert_branch(map, result);
+            map[result.player_row][result.player_col].type = EMPTY;
+            alert(map, result.player_row, result.player_col);
         }
     }
     else if (command == 'a') {
@@ -316,9 +312,9 @@ struct result move_player(struct tile map[MAX_ROW][MAX_COL], struct result resul
             result.player_col--;
         }
         else if (result.player_col - 1 >= 0 && map[result.player_row][result.player_col - 1].type == BRANCH) {
-            map[result.player_row][result.player_col - 1].type = EMPTY;
             result.player_col--;
-            alert_branch(map, result);
+            map[result.player_row][result.player_col].type = EMPTY;
+            alert(map, result.player_row, result.player_col);
         }
     }
     else if (command == 'd') {
@@ -326,9 +322,9 @@ struct result move_player(struct tile map[MAX_ROW][MAX_COL], struct result resul
             result.player_col++;
         }
         else if (result.player_col + 1 < MAX_COL && map[result.player_row][result.player_col + 1].type == BRANCH) {
-            map[result.player_row][result.player_col + 1].type = EMPTY;
             result.player_col++;
-            alert_branch(map, result);
+            map[result.player_row][result.player_col].type = EMPTY;
+            alert(map, result.player_row, result.player_col);
         }
     }
 
@@ -339,41 +335,49 @@ struct result cut_flower(struct tile map[MAX_ROW][MAX_COL], struct result result
     char command;
     scanf(" %c", &command);
     if (command == 'w') {
-        if (result.player_row - 1 >= 0 && map[result.player_row - 1][result.player_col].type == FLOWER) {
+        if (result.player_row - 1 >= 0 && 
+            map[result.player_row - 1][result.player_col].type == FLOWER) {
             map[result.player_row - 1][result.player_col].type = EMPTY;
-            alert_flower(map, result);            
+            alert(map, result.player_row - 1, result.player_col);
         }
-        else if (result.player_row - 1 >= 0 && map[result.player_row - 1][result.player_col].type == BUSH) {
+        else if (result.player_row - 1 >= 0 && 
+                 map[result.player_row - 1][result.player_col].type == BUSH) {
             map[result.player_row - 1][result.player_col].type = EMPTY;
         }
     }
 
     else if (command == 's') {
-        if (result.player_row + 1 < MAX_ROW && map[result.player_row + 1][result.player_col].type == FLOWER) {
+        if (result.player_row + 1 < MAX_ROW && 
+            map[result.player_row + 1][result.player_col].type == FLOWER) {
             map[result.player_row + 1][result.player_col].type = EMPTY;
-            alert_flower(map, result);
+            alert(map, result.player_row + 1, result.player_col);
         }
-        else if (result.player_row + 1 < MAX_ROW && map[result.player_row + 1][result.player_col].type == BUSH) {
+        else if (result.player_row + 1 < MAX_ROW && 
+                 map[result.player_row + 1][result.player_col].type == BUSH) {
             map[result.player_row + 1][result.player_col].type = EMPTY;
         }
     }
 
     else if (command == 'a') {
-        if (result.player_col - 1 >= 0 && map[result.player_row][result.player_col - 1].type == FLOWER) {
+        if (result.player_col - 1 >= 0 && 
+            map[result.player_row][result.player_col - 1].type == FLOWER) {
             map[result.player_row][result.player_col - 1].type = EMPTY;
-            alert_flower(map, result);
+            alert(map, result.player_row, result.player_col - 1);
         }
-        else if (result.player_col - 1 >= 0 && map[result.player_row][result.player_col - 1].type == BUSH) {
+        else if (result.player_col - 1 >= 0 && 
+                 map[result.player_row][result.player_col - 1].type == BUSH) {
             map[result.player_row][result.player_col - 1].type = EMPTY;
         }
     }
 
     else if (command == 'd') {
-        if (result.player_col + 1 < MAX_COL && map[result.player_row][result.player_col + 1].type == FLOWER) {
+        if (result.player_col + 1 < MAX_COL && 
+            map[result.player_row][result.player_col + 1].type == FLOWER) {
             map[result.player_row][result.player_col + 1].type = EMPTY;
-            alert_flower(map, result);
+            alert(map, result.player_row, result.player_col + 1);
         }
-        else if (result.player_col + 1 < MAX_COL && map[result.player_row][result.player_col + 1].type == BUSH) {
+        else if (result.player_col + 1 < MAX_COL && 
+                 map[result.player_row][result.player_col + 1].type == BUSH) {
             map[result.player_row][result.player_col + 1].type = EMPTY;
         }
     }
@@ -382,106 +386,22 @@ struct result cut_flower(struct tile map[MAX_ROW][MAX_COL], struct result result
 }
 
 // 2.4
-struct tile alert_branch(struct tile map[MAX_ROW][MAX_COL], struct result result) {
-    if (map[result.player_row][result.player_col].type == BRANCH) {
-        for (result.alert_row = result.player_row - 2; result.alert_row <= result.player_row + 2; result.alert_row++) {
-            for (result.alert_col = result.player_col - 2; result.alert_col <= result.player_row + 2; result.alert_col++) {
-                if (result.alert_row >= 0 && result.alert_row < MAX_ROW && 
-                    result.alert_col >= 0 && result.alert_col < MAX_COL && 
-                    map[result.alert_row][result.alert_col].type == FLOWER) 
-                {
-                    if (map[result.alert_row][result.alert_col].flower.state == DORMANT) {
-                        map[result.alert_row][result.alert_col].flower.state = DISTURBED;
-                    }
-                    else if (map[result.alert_row][result.alert_col].flower.state == DISTURBED) {
-                        map[result.alert_row][result.alert_col].flower.state = AWAKENED;
-                    }
+void alert(struct tile map[MAX_ROW][MAX_COL], int alert_row, int alert_col) {
+    for (int scan_row = alert_row - 2; scan_row <= alert_row + 2; scan_row++) {
+        for (int scan_col = alert_col - 2; scan_col <= alert_col + 2; scan_col++) {
+            if (scan_row >= 0 && scan_row < MAX_ROW && 
+                scan_col >= 0 && scan_col < MAX_COL && 
+                map[scan_row][scan_col].type == FLOWER) {
+                if (map[scan_row][scan_col].flower.state == DORMANT) {
+                    map[scan_row][scan_col].flower.state = DISTURBED;
+                }
+                else {
+                    map[scan_row][scan_col].flower.state = AWAKENED;
                 }
             }
         }
     }
-
-    return map[result.alert_row][result.alert_col];
 }
-
-struct tile alert_flower(struct tile map[MAX_ROW][MAX_COL], struct result result)
-{
-    char direction;
-    scanf(" %c", &direction);
-    if (direction == 'w') {
-        result.alert_row = result.player_row - 1;
-        result.alert_col = result.player_col;
-    }
-    else if (direction == 's') {
-        result.alert_row = result.player_row + 1;
-        result.alert_col = result.player_col;
-    }
-    else if (direction == 'a') {
-        result.alert_row = result.player_row;
-        result.alert_col = result.player_col - 1;
-    }
-    else if (direction == 'd') {
-        result.alert_row = result.player_row;
-        result.alert_col = result.player_col + 1;
-    }
-
-    if (map[result.alert_row][result.alert_col].type == FLOWER) {
-        for (result.alert_row = result.alert_row - 2; result.alert_row <= result.player_row + 2; result.alert_row++) {
-            for (result.alert_col = result.player_col - 2; result.alert_col <= result.player_row + 2; result.alert_col++) {
-                if (result.alert_row >= 0 && result.alert_row < MAX_ROW && 
-                    result.alert_col >= 0 && result.alert_col < MAX_COL && 
-                    map[result.alert_row][result.alert_col].type == FLOWER ) 
-                {
-                    if (map[result.alert_row][result.alert_col].flower.state == DORMANT) {
-                        map[result.alert_row][result.alert_col].flower.state = DISTURBED;
-                    }
-                    else if (map[result.alert_row][result.alert_col].flower.state == DISTURBED) {
-                        map[result.alert_row][result.alert_col].flower.state = AWAKENED;
-                    }
-                }
-            }
-        }
-    }
-
-    return map[result.alert_row][result.alert_col];
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 // Provided Functions
