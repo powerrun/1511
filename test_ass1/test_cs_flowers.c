@@ -271,7 +271,7 @@ void spawn_flowers(struct tile map[MAX_ROW][MAX_COL], struct result result) {
 
 // stage 2.2
 
-struct struct result action(struct tile map[MAX_ROW][MAX_COL], struct result result) {
+struct result action(struct tile map[MAX_ROW][MAX_COL], struct result result) {
     char command;
     printf("Game Started!\nEnter command: ");
     int return_val = scanf(" %c", &command);
