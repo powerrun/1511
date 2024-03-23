@@ -152,10 +152,10 @@ int main(void) {
     spawn_flowers(map, result);
     
     // stage 2.2 - 2.3
-    action(map, result);
-    if (result.game_alive == FALSE) {
-        return 0;
+    while (result.game_alive == TRUE) {
+        action(map, result);
     }
+    return 0;
 }
 
 
