@@ -83,7 +83,7 @@ void print_bush(struct tile map[MAX_ROW][MAX_COL]);
 
 // Stage 2
 void spawn_flowers(struct tile map[MAX_ROW][MAX_COL], struct result result);
-void action(struct tile map[MAX_ROW][MAX_COL], struct result result);
+struct result action(struct tile map[MAX_ROW][MAX_COL], struct result result);
 struct result move_player(struct tile map[MAX_ROW][MAX_COL], struct result result, char command);
 struct result cut_flower(struct tile map[MAX_ROW][MAX_COL], struct result result);
 void alert(struct tile map[MAX_ROW][MAX_COL], int alert_row, int alert_col);
@@ -153,9 +153,9 @@ int main(void) {
     
     // stage 2.2 - 2.3
     action(map, result);
-
-
-    return 0;
+    if (result.game_alive == FALSE) {
+        return 0;
+    }
 }
 
 
@@ -271,7 +271,7 @@ void spawn_flowers(struct tile map[MAX_ROW][MAX_COL], struct result result) {
 
 // stage 2.2
 
-void action(struct tile map[MAX_ROW][MAX_COL], struct result result) {
+struct struct result action(struct tile map[MAX_ROW][MAX_COL], struct result result) {
     char command;
     printf("Game Started!\nEnter command: ");
     int return_val = scanf(" %c", &command);
@@ -292,7 +292,7 @@ void action(struct tile map[MAX_ROW][MAX_COL], struct result result) {
             return_val = scanf(" %c", &command);
         }
         else {
-            break;
+            return result;
         }
 
     }
