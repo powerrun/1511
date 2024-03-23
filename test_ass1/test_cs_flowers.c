@@ -58,6 +58,7 @@ struct result
 {
     int player_row;
     int player_col;
+    // 
     int alert_row;
     int alert_col;
 };
@@ -79,14 +80,14 @@ void print_bush(struct tile map[MAX_ROW][MAX_COL]);
 
 // Stage 2
 void spawn_flowers(struct tile map[MAX_ROW][MAX_COL], struct result result);
-
 void action(struct tile map[MAX_ROW][MAX_COL], struct result result);
-
 struct result move_player(struct tile map[MAX_ROW][MAX_COL], struct result result, char command);
-
 struct result cut_flower(struct tile map[MAX_ROW][MAX_COL], struct result result);
-
 void alert(struct tile map[MAX_ROW][MAX_COL], int alert_row, int alert_col);
+
+// Stage 3
+void check_game_status(struct tile map[MAX_ROW][MAX_COL]);
+
 
 
 //--------------------------------
@@ -115,7 +116,7 @@ void print_flower(struct flower flower);
 int main(void) {
     struct tile map[MAX_ROW][MAX_COL];
     struct result result;
-    
+
     // initialize result and map
     result.alert_row = 0;
     result.alert_col = 0;
@@ -280,6 +281,8 @@ void action(struct tile map[MAX_ROW][MAX_COL], struct result result) {
         }
         print_map(map, result.player_row, result.player_col);
 
+        check_game_status(map);
+
         printf("Enter command: ");
         return_val = scanf(" %c", &command);
     }
@@ -402,6 +405,64 @@ void alert(struct tile map[MAX_ROW][MAX_COL], int alert_row, int alert_col) {
         }
     }
 }
+
+/*
+Stage 3.1 - Winning/Losing the Game
+Before you add more functionality to the flowers, you will need to deal with what happens when the player or all flowers are eliminated. At the end of each turn, you should check the map to see if the game should continue.
+
+If all flowers have been eliminated, then the command loop will finish and the message All flowers are eradicated and UNSW has been saved! should be printed out before the game terminates.
+
+Similarly, if the player was eliminated by a flower, then The flowers have beaten us, and UNSW is lost forever! is printed instead.
+
+As of right now, there is no method for flowers to eliminate the player, as this is handled in a later substage. You might need to come back to this substage to ensure that it is implemented correctly.
+Assumptions / Restrictions / Clarifications
+If both the player and all flowers have been eliminated, then the game is considered lost.
+*/
+
+void check_game_status(struct tile map[MAX_ROW][MAX_COL]) {
+    for (int num_flower = 0, scan_row = 0; scan_row < MAX_ROW; scan_row++) {
+        for (int scan_col = 0; scan_col < MAX_COL; scan_col++) {
+            if (map[scan_row][scan_col].type == FLOWER) {
+                num_flower++;
+                
+            }
+        }
+    }
+    if 
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 // Provided Functions
