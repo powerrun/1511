@@ -416,29 +416,34 @@ void alert(struct tile map[MAX_ROW][MAX_COL], int alert_row, int alert_col) {
 
 // Stage 3.1
 
-int check_game_status(struct tile map[MAX_ROW][MAX_COL], 
-                      int player_alive, int game_alive) 
-{
+int check_game_status(struct tile map[MAX_ROW][MAX_COL], int player_alive, int game_alive) {
+    //
+    // Stage 3.1 - Winning/Losing the Game
+    // Before you add more functionality to the flowers, you will need to deal with what happens when the player or all flowers are eliminated. At the end of each turn, you should check the map to see if the game should continue.
+
+    // If all flowers have been eliminated, then the command loop will finish and the message All flowers are eradicated and UNSW has been saved! should be printed out before the game terminates.
+
+    // Similarly, if the player was eliminated by a flower, then The flowers have beaten us, and UNSW is lost forever! is printed instead.
+
     int num_flower = 0;
-    for (int scan_row = 0; scan_row < MAX_ROW; scan_row++) {
-        for (int scan_col = 0; scan_col < MAX_COL; scan_col++) {
-            if (map[scan_row][scan_col].type == FLOWER) {
+    for (int flower_row = 0; flower_row < MAX_ROW; flower_row++) {
+        for (int flower_col = 0; flower_col < MAX_COL; flower_col++) {
+            if (map[flower_row][flower_col].type == FLOWER) {
                 num_flower++;
             }
         }
     }
-    if (num_flower < 1 && player_alive == TRUE) {
+
+    if (num_flower == 0) {
         printf("All flowers are eradicated and UNSW has been saved!\n");
-        game_alive = FALSE;
+        return FALSE;
     }
-    else if (player_alive == FALSE) {
+
+    if (map[result.player_row][result.player_col].type == FLOWER) {
         printf("The flowers have beaten us, and UNSW is lost forever!\n");
-        game_alive = FALSE;
+        return FALSE;
     }
-
-    return game_alive;
 }
-
 
 
 
