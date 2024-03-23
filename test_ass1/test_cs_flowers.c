@@ -89,7 +89,7 @@ struct result cut_flower(struct tile map[MAX_ROW][MAX_COL], struct result result
 void alert(struct tile map[MAX_ROW][MAX_COL], int alert_row, int alert_col);
 
 // Stage 3
-void check_game_status(struct tile map[MAX_ROW][MAX_COL], int player_alive, int game_alive);
+int check_game_status(struct tile map[MAX_ROW][MAX_COL], int player_alive, int game_alive);
 
 
 
@@ -285,10 +285,16 @@ void action(struct tile map[MAX_ROW][MAX_COL], struct result result) {
         }
         print_map(map, result.player_row, result.player_col);
 
-        check_game_status(map, result.player_alive, result.game_alive);
+        // check game status and decide whether to continue
+        result.game_alive = check_game_status(map, result.player_alive, result.game_alive);
+        if (result.game_alive == TRUE) {
+            printf("Enter command: ");
+            return_val = scanf(" %c", &command);
+        }
+        else {
+            break;
+        }
 
-        printf("Enter command: ");
-        return_val = scanf(" %c", &command);
     }
 }
 
@@ -426,11 +432,13 @@ If both the player and all flowers have been eliminated, then the game is consid
 int check_game_status(struct tile map[MAX_ROW][MAX_COL], 
                       int player_alive, int game_alive) 
 {
-    for (int num_flower = 0, scan_row = 0; scan_row < MAX_ROW; scan_row++) {
+    int num_flower = 0;
+    for (int scan_row = 0; scan_row < MAX_ROW; scan_row++) {
         for (int scan_col = 0; scan_col < MAX_COL; scan_col++) {
             if (map[scan_row][scan_col].type == FLOWER) {
                 num_flower++;
             }
+        }
     }
     if (num_flower < 1 && player_alive == TRUE) {
         printf("All flowers are eradicated and UNSW has been saved!\n");
@@ -438,6 +446,8 @@ int check_game_status(struct tile map[MAX_ROW][MAX_COL],
     else if (player_alive == FALSE) {
         printf("The flowers have beaten us, and UNSW is lost forever!\n");
     }
+
+    return game_alive;
 }
 
 
