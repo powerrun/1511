@@ -58,9 +58,12 @@ struct result
 {
     int player_row;
     int player_col;
+    int player_alive;
     // 
     int alert_row;
     int alert_col;
+    
+    int game_alive;
 };
 
 
@@ -86,7 +89,7 @@ struct result cut_flower(struct tile map[MAX_ROW][MAX_COL], struct result result
 void alert(struct tile map[MAX_ROW][MAX_COL], int alert_row, int alert_col);
 
 // Stage 3
-void check_game_status(struct tile map[MAX_ROW][MAX_COL]);
+void check_game_status(struct tile map[MAX_ROW][MAX_COL], int player_alive, int game_alive);
 
 
 
@@ -121,7 +124,7 @@ int main(void) {
     result.alert_row = 0;
     result.alert_col = 0;
     initialise_map(map);
-    
+    result.game_alive = TRUE;    
     printf("Welcome to CS Flowers!\n");
 
     // Stage 1.1: Scan in the player position and print out the map
@@ -137,6 +140,7 @@ int main(void) {
         printf("Re-enter starting position: ");
         scanf("%d %d", &result.player_row, &result.player_col);
     }
+    result.player_alive = TRUE;
     print_map(map, result.player_row, result.player_col);
     
     // Stage 1.3 - Add foliage onto the map, starting with branches
@@ -281,7 +285,7 @@ void action(struct tile map[MAX_ROW][MAX_COL], struct result result) {
         }
         print_map(map, result.player_row, result.player_col);
 
-        check_game_status(map);
+        check_game_status(map, result.player_alive, result.game_alive);
 
         printf("Enter command: ");
         return_val = scanf(" %c", &command);
@@ -419,16 +423,21 @@ Assumptions / Restrictions / Clarifications
 If both the player and all flowers have been eliminated, then the game is considered lost.
 */
 
-void check_game_status(struct tile map[MAX_ROW][MAX_COL]) {
+int check_game_status(struct tile map[MAX_ROW][MAX_COL], 
+                      int player_alive, int game_alive) 
+{
     for (int num_flower = 0, scan_row = 0; scan_row < MAX_ROW; scan_row++) {
         for (int scan_col = 0; scan_col < MAX_COL; scan_col++) {
             if (map[scan_row][scan_col].type == FLOWER) {
                 num_flower++;
-                
             }
-        }
     }
-    if 
+    if (num_flower < 1 && player_alive == TRUE) {
+        printf("All flowers are eradicated and UNSW has been saved!\n");
+    }
+    else if (player_alive == FALSE) {
+        printf("The flowers have beaten us, and UNSW is lost forever!\n");
+    }
 }
 
 
