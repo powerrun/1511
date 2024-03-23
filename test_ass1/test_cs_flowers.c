@@ -6,6 +6,7 @@
 // TODO: Description of program
 
 #include <stdio.h>
+#include <stdlib.h>
 
 //------------------------------------------------------------------------------
 // Constants
