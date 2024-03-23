@@ -90,7 +90,7 @@ struct result cut_flower(struct tile map[MAX_ROW][MAX_COL], struct result result
 void alert(struct tile map[MAX_ROW][MAX_COL], int alert_row, int alert_col);
 
 // Stage 3
-void check_game_status(struct tile map[MAX_ROW][MAX_COL], int player_alive, int game_alive);
+int check_game_status(struct tile map[MAX_ROW][MAX_COL], int player_alive, int game_alive);
 
 
 
@@ -286,7 +286,7 @@ struct result action(struct tile map[MAX_ROW][MAX_COL], struct result result) {
         print_map(map, result.player_row, result.player_col);
 
         // check game status and decide whether to continue
-        check_game_status(map, result.player_alive, result.game_alive);
+        result.game_alive = check_game_status(map, result.player_alive, result.game_alive);
         if (result.game_alive == TRUE) {
             printf("Enter command: ");
             return_val = scanf(" %c", &command);
@@ -416,7 +416,7 @@ void alert(struct tile map[MAX_ROW][MAX_COL], int alert_row, int alert_col) {
 
 // Stage 3.1
 
-void check_game_status(struct tile map[MAX_ROW][MAX_COL], 
+int check_game_status(struct tile map[MAX_ROW][MAX_COL], 
                       int player_alive, int game_alive) 
 {
     int num_flower = 0;
@@ -429,13 +429,14 @@ void check_game_status(struct tile map[MAX_ROW][MAX_COL],
     }
     if (num_flower < 1 && player_alive == TRUE) {
         printf("All flowers are eradicated and UNSW has been saved!\n");
+        game_alive = FALSE;
     }
     else if (player_alive == FALSE) {
         printf("The flowers have beaten us, and UNSW is lost forever!\n");
-        exit(1);
+        game_alive = FALSE;
     }
 
-    // return game_alive;
+    return game_alive;
 }
 
 
