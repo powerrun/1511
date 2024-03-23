@@ -291,11 +291,8 @@ struct result action(struct tile map[MAX_ROW][MAX_COL], struct result result) {
             printf("Enter command: ");
             return_val = scanf(" %c", &command);
         }
-        else {
-            return result;
-        }
-
     }
+    return result;
 }
 
 struct result move_player(struct tile map[MAX_ROW][MAX_COL], struct result result, char command) {
