@@ -167,90 +167,130 @@ int main(void) {
 
 void print_foliage(struct tile map[MAX_ROW][MAX_COL], struct result result)
 {
+    // variables for storing foliage type and count
     char foliage_type = ' ';
     int num_foliage;
+    
+    // scan in the num
     printf("How many tiles of foliage: ");
     scanf("%d", &num_foliage);
 
+    // iterate through each foliage
     for (int count = 0; count < num_foliage; count++)
     {
-        // ask type
+        // scan in the type of foliage (branch or bush)
         scanf(" %c", &foliage_type);
         
-        // branch
+        // // add branch if foliage type is 'b'
         if (foliage_type == 'b') {
             print_branch(map);
         }
 
-        // bush
+        // // add bush if foliage type is 'u'
         else if (foliage_type == 'u') {
             print_bush(map);
         }
     }
+
+    // update the map
     print_map(map, result.player_row, result.player_col);
 }
 
+// function to record a position of branch
 void print_branch(struct tile map[MAX_ROW][MAX_COL]) {
+    // variables to store the position of foliage
     int foliage_row, foliage_col;
+
+    // scan in the position
     scanf("%d %d", &foliage_row, &foliage_col);
+
+    // check if the position is within the map boundaries
     if (foliage_row > 0 && foliage_row < MAX_ROW - 1 && 
         foliage_col > 0 && foliage_col < MAX_COL - 1) {
+        // if the position is valid, set the type of the tile to BRANCH
         map[foliage_row][foliage_col].type = BRANCH;
         printf("Branch added!\n");
     }
     else {
+        // if the position is not valid, inform player and ignore the position
         printf("Invalid foliage position!\n");
     }
 }
 
+// function to record a position of bush
 void print_bush(struct tile map[MAX_ROW][MAX_COL]) {
     int foliage_row, foliage_col;
     char direction;
     int num_bush;
 
+    // scan in the position, direction, and number of bushes
     scanf("%d %d %c %d", &foliage_row, &foliage_col, &direction, &num_bush);
+    
+    // check if the position is within the map boundaries
     if (foliage_row > 0 && foliage_row < MAX_ROW - 1 && 
         foliage_col > 0 && foliage_col < MAX_COL - 1) {
+
+        // if the position is valid, determine the direction and numbers of the bushes
+        // if direction is h, place bushes horizontally
         if (direction == 'h') {
             for (int i = 0; i < num_bush; i++) {
                 map[foliage_row][foliage_col + i].type = BUSH;
             }
         }
+
+        // if direction is v, place bushes vertically
         else if (direction == 'v') {
             for (int i = 0; i < num_bush; i++) {
                 map[foliage_row + i][foliage_col].type = BUSH;
             }
         }
+        // inform the player that bushes have been added
         printf("Bush added!\n");
     }
     else {
+        // if the position is not valid, inform player and ignore the position
         printf("Invalid foliage position!\n");
     }
 }
 
 
 // stage 2.1
-
+// function to spawn flowers at a player-specified position
 void spawn_flowers(struct tile map[MAX_ROW][MAX_COL], struct result result) {
+    // variables to store the number of the flower
     int num_flower;
+
+    // ask and scan in the number
     printf("How many flowers: ");
     scanf("%d", &num_flower);
-    
+
+    // When the number is greater than 25, spawn flowers at all valid positions 
+    // as a maximum of 25 flowers can be spawned
     if (num_flower >= 25) {
+
+        // spawn flowers at all (odd, odd) positions by using 2 for loops
         for (int flower_row = 1; flower_row < MAX_ROW; flower_row += 2) {
             for (int flower_col = 1; flower_col < MAX_COL; flower_col += 2) {
-                if (map[flower_row][flower_col].type == EMPTY) {
+                // check if the tile is empty before adding a flower
+                if (map[flower_row][flower_col].type == EMPTY) {    
+                    // spawn a flower to the empty tile and set its state to DORMANT
                     map[flower_row][flower_col].type = FLOWER;
                     map[flower_row][flower_col].flower.state = DORMANT;
                 }
             }
         }
     }
+    // if the number of flowers is less then 25, spawn flowers at a player-specified position
+    // and count numbers of flowers
     else {
         for (int count = 0; count < num_flower; count++) {
             int flower_row, flower_col;
+            
+            // scan in the position of a flower
             scanf("%d %d", &flower_row, &flower_col);
 
+            // check if the position is valid for spawning a flower
+            // if the position is valid, add a flower and set its state to DORMANT
             if (flower_row % 2 == 1 && flower_row < MAX_ROW - 1 && 
                 flower_col % 2 == 1 && flower_col < MAX_COL -1 && 
                 map[flower_row][flower_col].type == EMPTY)
@@ -258,22 +298,32 @@ void spawn_flowers(struct tile map[MAX_ROW][MAX_COL], struct result result) {
                 map[flower_row][flower_col].type = FLOWER;
                 map[flower_row][flower_col].flower.state = DORMANT;
             }
+            // if the position is not valid, inform player and ignore the position
             else {
                 printf("Invalid flower position!\n");
             }
         }
     }
 
+    // update the map
     print_map(map, result.player_row, result.player_col);
 }
 
 // stage 2.2
-
+// function to handle player actions (move and cut) during the game
+// and determine should the game continue
 struct result action(struct tile map[MAX_ROW][MAX_COL], struct result result) {
+    // variable to store a player-specified command
     char command;
     printf("Game Started!\nEnter command: ");
+    
+    // 'scanf' scans in the first character
+    // then 'return_val' store the number of items 
+    // successfully matched and assigned by 'scanf'
     int return_val = scanf(" %c", &command);
 
+    // loop commands as long as a valid input
+    // ctrl + d will stop the loop
     while (return_val == 1) {
         //command: move or cut
         if (command == 'c') {

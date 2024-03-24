@@ -252,3 +252,48 @@ void alerting_flowers(struct tile map[MAX_ROW][MAX_COL], int player_row, int pla
         result.alert_row = result.player_row;
         result.alert_col = result.player_col + 1;
     }
+
+
+
+// Function to handle player actions during the game
+struct result action(struct tile map[MAX_ROW][MAX_COL], struct result result) {
+    // Variable to store the command entered by the player
+    char command;
+    
+    // Prompt the player to start the game and enter a command
+    printf("Game Started!\nEnter command: ");
+    
+    // Read the first command entered by the player
+    int return_val = scanf(" %c", &command);
+
+    // Continue executing commands as long as a valid command is entered
+    while (return_val == 1) {
+        // Determine the action based on the command entered by the player
+        if (command == 'c') {
+            // If the command is to cut, call the cut_flower function
+            result = cut_flower(map, result);
+        }
+        else {
+            // If the command is to move, call the move_player function
+            result = move_player(map, result, command);
+        }
+        
+        // Print the updated map after each action
+        print_map(map, result.player_row, result.player_col);
+
+        // Check the game status to determine whether to continue
+        result.game_alive = check_game_status(map, result);
+        if (result.game_alive == TRUE) {
+            // If the game is still ongoing, prompt the player for the next command
+            printf("Enter command: ");
+            return_val = scanf(" %c", &command);
+        }
+        else {
+            // If the game is over, break out of the loop
+            break;
+        }
+    }
+    
+    // Return the final result of the game
+    return result;
+}
