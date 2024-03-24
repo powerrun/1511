@@ -60,7 +60,7 @@ struct result
     int player_row;
     int player_col;
     int player_alive;
-    // 
+    //
     int alert_row;
     int alert_col;
     
@@ -90,7 +90,7 @@ struct result cut_flower(struct tile map[MAX_ROW][MAX_COL], struct result result
 void alert(struct tile map[MAX_ROW][MAX_COL], int alert_row, int alert_col);
 
 // Stage 3
-int check_game_status(struct tile map[MAX_ROW][MAX_COL], int player_alive, int game_alive);
+int check_game_status(struct tile map[11][11], struct result result);
 
 
 
@@ -152,9 +152,7 @@ int main(void) {
     spawn_flowers(map, result);
     
     // stage 2.2 - 2.3
-    while (result.game_alive == TRUE) {
-        action(map, result);
-    }
+    action(map, result);
     return 0;
 }
 
@@ -277,6 +275,7 @@ struct result action(struct tile map[MAX_ROW][MAX_COL], struct result result) {
     int return_val = scanf(" %c", &command);
 
     while (return_val == 1) {
+        //command: move or cut
         if (command == 'c') {
             result = cut_flower(map, result);
         }
@@ -286,10 +285,13 @@ struct result action(struct tile map[MAX_ROW][MAX_COL], struct result result) {
         print_map(map, result.player_row, result.player_col);
 
         // check game status and decide whether to continue
-        result.game_alive = check_game_status(map, result.player_alive, result.game_alive);
+        result.game_alive = check_game_status(map, result);
         if (result.game_alive == TRUE) {
             printf("Enter command: ");
             return_val = scanf(" %c", &command);
+        }
+        else {
+            break;
         }
     }
     return result;
@@ -343,55 +345,46 @@ struct result move_player(struct tile map[MAX_ROW][MAX_COL], struct result resul
 
 struct result cut_flower(struct tile map[MAX_ROW][MAX_COL], struct result result) {
     char command;
-    scanf(" %c", &command);
-    if (command == 'w') {
-        if (result.player_row - 1 >= 0 && 
-            map[result.player_row - 1][result.player_col].type == FLOWER) {
-            map[result.player_row - 1][result.player_col].type = EMPTY;
-            alert(map, result.player_row - 1, result.player_col);
-        }
-        else if (result.player_row - 1 >= 0 && 
-                 map[result.player_row - 1][result.player_col].type == BUSH) {
-            map[result.player_row - 1][result.player_col].type = EMPTY;
-        }
-    }
-
-    else if (command == 's') {
-        if (result.player_row + 1 < MAX_ROW && 
-            map[result.player_row + 1][result.player_col].type == FLOWER) {
-            map[result.player_row + 1][result.player_col].type = EMPTY;
-            alert(map, result.player_row + 1, result.player_col);
-        }
-        else if (result.player_row + 1 < MAX_ROW && 
-                 map[result.player_row + 1][result.player_col].type == BUSH) {
-            map[result.player_row + 1][result.player_col].type = EMPTY;
-        }
-    }
-
-    else if (command == 'a') {
-        if (result.player_col - 1 >= 0 && 
-            map[result.player_row][result.player_col - 1].type == FLOWER) {
-            map[result.player_row][result.player_col - 1].type = EMPTY;
-            alert(map, result.player_row, result.player_col - 1);
-        }
-        else if (result.player_col - 1 >= 0 && 
-                 map[result.player_row][result.player_col - 1].type == BUSH) {
-            map[result.player_row][result.player_col - 1].type = EMPTY;
-        }
-    }
-
-    else if (command == 'd') {
-        if (result.player_col + 1 < MAX_COL && 
-            map[result.player_row][result.player_col + 1].type == FLOWER) {
-            map[result.player_row][result.player_col + 1].type = EMPTY;
-            alert(map, result.player_row, result.player_col + 1);
-        }
-        else if (result.player_col + 1 < MAX_COL && 
-                 map[result.player_row][result.player_col + 1].type == BUSH) {
-            map[result.player_row][result.player_col + 1].type = EMPTY;
+    int return_val = scanf(" %c", &command);
+    if (return_val == 1) {
+        if (command == 'w') {
+            if (result.player_row - 1 >= 0 &&
+                map[result.player_row - 1][result.player_col].type == FLOWER) {
+                map[result.player_row - 1][result.player_col].type = EMPTY;
+                alert(map, result.player_row - 1, result.player_col);
+            } else if (result.player_row - 1 >= 0 &&
+                       map[result.player_row - 1][result.player_col].type == BUSH) {
+                map[result.player_row - 1][result.player_col].type = EMPTY;
+            }
+        } else if (command == 's') {
+            if (result.player_row + 1 < MAX_ROW &&
+                map[result.player_row + 1][result.player_col].type == FLOWER) {
+                map[result.player_row + 1][result.player_col].type = EMPTY;
+                alert(map, result.player_row + 1, result.player_col);
+            } else if (result.player_row + 1 < MAX_ROW &&
+                       map[result.player_row + 1][result.player_col].type == BUSH) {
+                map[result.player_row + 1][result.player_col].type = EMPTY;
+            }
+        } else if (command == 'a') {
+            if (result.player_col - 1 >= 0 &&
+                map[result.player_row][result.player_col - 1].type == FLOWER) {
+                map[result.player_row][result.player_col - 1].type = EMPTY;
+                alert(map, result.player_row, result.player_col - 1);
+            } else if (result.player_col - 1 >= 0 &&
+                       map[result.player_row][result.player_col - 1].type == BUSH) {
+                map[result.player_row][result.player_col - 1].type = EMPTY;
+            }
+        } else if (command == 'd') {
+            if (result.player_col + 1 < MAX_COL &&
+                map[result.player_row][result.player_col + 1].type == FLOWER) {
+                map[result.player_row][result.player_col + 1].type = EMPTY;
+                alert(map, result.player_row, result.player_col + 1);
+            } else if (result.player_col + 1 < MAX_COL &&
+                       map[result.player_row][result.player_col + 1].type == BUSH) {
+                map[result.player_row][result.player_col + 1].type = EMPTY;
+            }
         }
     }
-
     return result;
 }
 
@@ -416,18 +409,10 @@ void alert(struct tile map[MAX_ROW][MAX_COL], int alert_row, int alert_col) {
 
 // Stage 3.1
 
-int check_game_status(struct tile map[MAX_ROW][MAX_COL], int player_alive, int game_alive) {
-    //
-    // Stage 3.1 - Winning/Losing the Game
-    // Before you add more functionality to the flowers, you will need to deal with what happens when the player or all flowers are eliminated. At the end of each turn, you should check the map to see if the game should continue.
-
-    // If all flowers have been eliminated, then the command loop will finish and the message All flowers are eradicated and UNSW has been saved! should be printed out before the game terminates.
-
-    // Similarly, if the player was eliminated by a flower, then The flowers have beaten us, and UNSW is lost forever! is printed instead.
-
+int check_game_status(struct tile map[11][11], struct result result) {
     int num_flower = 0;
-    for (int flower_row = 0; flower_row < MAX_ROW; flower_row++) {
-        for (int flower_col = 0; flower_col < MAX_COL; flower_col++) {
+    for (int flower_row = 1; flower_row < MAX_ROW; flower_row = flower_row + 2) {
+        for (int flower_col = 1; flower_col < MAX_COL; flower_col = flower_col + 2) {
             if (map[flower_row][flower_col].type == FLOWER) {
                 num_flower++;
             }
@@ -436,13 +421,13 @@ int check_game_status(struct tile map[MAX_ROW][MAX_COL], int player_alive, int g
 
     if (num_flower == 0) {
         printf("All flowers are eradicated and UNSW has been saved!\n");
-        return FALSE;
+        result.game_alive = FALSE;
     }
-
-    if (map[result.player_row][result.player_col].type == FLOWER) {
+    else if (map[result.player_row][result.player_col].type == FLOWER) {
         printf("The flowers have beaten us, and UNSW is lost forever!\n");
-        return FALSE;
+        result.game_alive = FALSE;
     }
+    return result.game_alive;
 }
 
 
@@ -596,4 +581,5 @@ void print_flower(struct flower flower) {
         printf("*w*");
     }
 }
+
 
