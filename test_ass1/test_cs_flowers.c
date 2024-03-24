@@ -318,59 +318,96 @@ struct result action(struct tile map[MAX_ROW][MAX_COL], struct result result) {
     return result;
 }
 
-// function to move the player on the game map based on player's command
-struct result move_player(struct tile map[MAX_ROW][MAX_COL], struct result result, char command) {
-    // check the command
-    // if command is w
-    if (command == 'w') {
-        // check is the target tile is within the boundaries and empty
-        if (result.player_row - 1 >= 0 && 
-            map[result.player_row - 1][result.player_col].type == EMPTY) {
-            // if yes, move the player to the target tile
-            result.player_row--;
-        }
-        // check is the target tile is within the boundaries and is a branch
-        else if (result.player_row - 1 >= 0 && map[result.player_row - 1][result.player_col].type == BRANCH) {
-            result.player_row--;
-            // if yes, remove the branch and move the player to the target tile
-            map[result.player_row][result.player_col].type = EMPTY;
-            // alert nearby flowers
-            alert(map, result.player_row, result.player_col);
-        }
-    }
-    else if (command == 's') {
-        if (result.player_row + 1 < MAX_ROW && map[result.player_row + 1][result.player_col].type == EMPTY) {
-            result.player_row++;
-        }
-        else if (result.player_row + 1 < MAX_ROW && map[result.player_row + 1][result.player_col].type == BRANCH) {
-            result.player_row++;
-            map[result.player_row][result.player_col].type = EMPTY;
-            alert(map, result.player_row, result.player_col);
-        }
-    }
-    else if (command == 'a') {
-        if (result.player_col - 1 >= 0 && map[result.player_row][result.player_col - 1].type == EMPTY) {
-            result.player_col--;
-        }
-        else if (result.player_col - 1 >= 0 && map[result.player_row][result.player_col - 1].type == BRANCH) {
-            result.player_col--;
-            map[result.player_row][result.player_col].type = EMPTY;
-            alert(map, result.player_row, result.player_col);
-        }
-    }
-    else if (command == 'd') {
-        if (result.player_col + 1 < MAX_COL && map[result.player_row][result.player_col + 1].type == EMPTY) {
-            result.player_col++;
-        }
-        else if (result.player_col + 1 < MAX_COL && map[result.player_row][result.player_col + 1].type == BRANCH) {
-            result.player_col++;
-            map[result.player_row][result.player_col].type = EMPTY;
-            alert(map, result.player_row, result.player_col);
-        }
-    }
 
+
+// Function to determine the type of tile after player's move
+enum tile_type get_target_tile_type(struct tile map[MAX_ROW][MAX_COL], int player_row, int player_col, char command) {
+    if (command == 'w') {
+        return map[player_row - 1][player_col].type;
+    } else if (command == 's') {
+        return map[player_row + 1][player_col].type;
+    } else if (command == 'a') {
+        return map[player_row][player_col - 1].type;
+    } else if (command == 'd') {
+        return map[player_row][player_col + 1].type;
+    } else {
+    }
+}
+
+// Function to move the player based on the command
+struct result move_player(struct result result, char command) {
+    if (command == 'w') {
+        result.player_row--;
+    } else if (command == 's') {
+        result.player_row++;
+    } else if (command == 'a') {
+        result.player_col--;
+    } else if (command == 'd') {
+        result.player_col++;
+    }
     return result;
 }
+
+
+
+
+
+
+
+
+// // function to move the player on the game map based on player's command
+// struct result move_player(struct tile map[MAX_ROW][MAX_COL], struct result result, char command) {
+//     // check the command
+//     // if command is w
+//     if (command == 'w') {
+//         // check is the target tile is within the boundaries and empty
+//         if (result.player_row - 1 >= 0 && 
+//             map[result.player_row - 1][result.player_col].type == EMPTY) {
+//             // if yes, move the player to the target tile
+//             result.player_row--;
+//         }
+//         // check is the target tile is within the boundaries and is a branch
+//         else if (result.player_row - 1 >= 0 && map[result.player_row - 1][result.player_col].type == BRANCH) {
+//             result.player_row--;
+//             // if yes, remove the branch and move the player to the target tile
+//             map[result.player_row][result.player_col].type = EMPTY;
+//             // alert nearby flowers
+//             alert(map, result.player_row, result.player_col);
+//         }
+//     }
+//     else if (command == 's') {
+//         if (result.player_row + 1 < MAX_ROW && map[result.player_row + 1][result.player_col].type == EMPTY) {
+//             result.player_row++;
+//         }
+//         else if (result.player_row + 1 < MAX_ROW && map[result.player_row + 1][result.player_col].type == BRANCH) {
+//             result.player_row++;
+//             map[result.player_row][result.player_col].type = EMPTY;
+//             alert(map, result.player_row, result.player_col);
+//         }
+//     }
+//     else if (command == 'a') {
+//         if (result.player_col - 1 >= 0 && map[result.player_row][result.player_col - 1].type == EMPTY) {
+//             result.player_col--;
+//         }
+//         else if (result.player_col - 1 >= 0 && map[result.player_row][result.player_col - 1].type == BRANCH) {
+//             result.player_col--;
+//             map[result.player_row][result.player_col].type = EMPTY;
+//             alert(map, result.player_row, result.player_col);
+//         }
+//     }
+//     else if (command == 'd') {
+//         if (result.player_col + 1 < MAX_COL && map[result.player_row][result.player_col + 1].type == EMPTY) {
+//             result.player_col++;
+//         }
+//         else if (result.player_col + 1 < MAX_COL && map[result.player_row][result.player_col + 1].type == BRANCH) {
+//             result.player_col++;
+//             map[result.player_row][result.player_col].type = EMPTY;
+//             alert(map, result.player_row, result.player_col);
+//         }
+//     }
+
+//     return result;
+// }
 
 struct result cut_flower(struct tile map[MAX_ROW][MAX_COL], struct result result) {
     char command;

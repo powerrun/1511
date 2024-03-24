@@ -404,3 +404,62 @@ struct result move_player(struct tile map[MAX_ROW][MAX_COL], struct result resul
     // Return the updated result after the player's movement
     return result;
 }
+
+
+
+
+
+
+
+
+
+
+
+void function_defend_flower(struct tile map[MAX_ROW][MAX_COL]) {
+    for (int row = 1; row < MAX_ROW - 1; row++) {
+        for (int col = 1; col < MAX_COL - 1; col++) {
+            if (map[row][col].type == FLOWER && map[row][col].flower.state != DORMANT) {
+                if (map[row][col].flower.skip_next_defense) {
+                    
+                    map[row][col].flower.skip_next_defense = FALSE; 
+                } 
+                else {
+                    
+                    place_bush_around_flower(map, row, col);
+                }
+            }
+        }
+    }
+}
+
+void place_bush_around_flower(struct tile map[MAX_ROW][MAX_COL], int flower_row, int flower_col) {
+    
+    int weak_points_order[4][2] = { {flower_row + 1, flower_col}, {flower_row, flower_col + 1}, {flower_row - 1, flower_col}, {flower_row, flower_col - 1} };
+
+    for (int i = 0; i < 4; i++) {
+        int weak_row = weak_points_order[i][0];
+        int weak_col = weak_points_order[i][1];
+        if (weak_row >= 0 && weak_row < MAX_ROW &&
+            weak_col >= 0 && weak_col < MAX_COL &&
+            map[weak_row][weak_col].type == BRANCH) {
+
+            
+            map[weak_row][weak_col].type = BUSH;
+            map[flower_row][flower_col].flower.skip_next_defense = TRUE;
+            
+        }
+        
+        if (weak_row >= 0 && weak_row < MAX_ROW &&
+            weak_col >= 0 && weak_col < MAX_COL &&
+            map[weak_row][weak_col].type == EMPTY) {
+
+        
+            map[weak_row][weak_col].type = BUSH;
+            map[flower_row][flower_col].flower.skip_next_defense = TRUE;
+            break; 
+        }
+    }
+}
+
+
+
