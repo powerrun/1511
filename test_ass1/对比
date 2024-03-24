@@ -255,45 +255,152 @@ void alerting_flowers(struct tile map[MAX_ROW][MAX_COL], int player_row, int pla
 
 
 
-// Function to handle player actions during the game
-struct result action(struct tile map[MAX_ROW][MAX_COL], struct result result) {
-    // Variable to store the command entered by the player
-    char command;
-    
-    // Prompt the player to start the game and enter a command
-    printf("Game Started!\nEnter command: ");
-    
-    // Read the first command entered by the player
-    int return_val = scanf(" %c", &command);
 
-    // Continue executing commands as long as a valid command is entered
-    while (return_val == 1) {
-        // Determine the action based on the command entered by the player
-        if (command == 'c') {
-            // If the command is to cut, call the cut_flower function
-            result = cut_flower(map, result);
+// Function to move the player on the game map based on the given command
+struct result move_player(struct tile map[MAX_ROW][MAX_COL], struct result result, char command) {
+    // Check the command provided by the player
+    if (command == 'w') {
+        // Move the player upwards ('w' key)
+        if (result.player_row - 1 >= 0 && 
+            map[result.player_row - 1][result.player_col].type == EMPTY) {
+            // Check if the destination tile is empty
+            // If yes, move the player to the empty tile
+            result.player_row--;
         }
-        else {
-            // If the command is to move, call the move_player function
-            result = move_player(map, result, command);
-        }
-        
-        // Print the updated map after each action
-        print_map(map, result.player_row, result.player_col);
-
-        // Check the game status to determine whether to continue
-        result.game_alive = check_game_status(map, result);
-        if (result.game_alive == TRUE) {
-            // If the game is still ongoing, prompt the player for the next command
-            printf("Enter command: ");
-            return_val = scanf(" %c", &command);
-        }
-        else {
-            // If the game is over, break out of the loop
-            break;
+        else if (result.player_row - 1 >= 0 && map[result.player_row - 1][result.player_col].type == BRANCH) {
+            // If the destination tile contains a branch
+            // Move the player and remove the branch
+            result.player_row--;
+            map[result.player_row][result.player_col].type = EMPTY;
+            // Alert nearby flowers about the player's action
+            alert(map, result.player_row, result.player_col);
         }
     }
-    
-    // Return the final result of the game
+    else if (command == 's') {
+        // Move the player downwards ('s' key)
+        if (result.player_row + 1 < MAX_ROW && map[result.player_row + 1][result.player_col].type == EMPTY) {
+            // Check if the destination tile is empty
+            // If yes, move the player to the empty tile
+            result.player_row++;
+        }
+        else if (result.player_row + 1 < MAX_ROW && map[result.player_row + 1][result.player_col].type == BRANCH) {
+            // If the destination tile contains a branch
+            // Move the player and remove the branch
+            result.player_row++;
+            map[result.player_row][result.player_col].type = EMPTY;
+            // Alert nearby flowers about the player's action
+            alert(map, result.player_row, result.player_col);
+        }
+    }
+    else if (command == 'a') {
+        // Move the player to the left ('a' key)
+        if (result.player_col - 1 >= 0 && map[result.player_row][result.player_col - 1].type == EMPTY) {
+            // Check if the destination tile is empty
+            // If yes, move the player to the empty tile
+            result.player_col--;
+        }
+        else if (result.player_col - 1 >= 0 && map[result.player_row][result.player_col - 1].type == BRANCH) {
+            // If the destination tile contains a branch
+            // Move the player and remove the branch
+            result.player_col--;
+            map[result.player_row][result.player_col].type = EMPTY;
+            // Alert nearby flowers about the player's action
+            alert(map, result.player_row, result.player_col);
+        }
+    }
+    else if (command == 'd') {
+        // Move the player to the right ('d' key)
+        if (result.player_col + 1 < MAX_COL && map[result.player_row][result.player_col + 1].type == EMPTY) {
+            // Check if the destination tile is empty
+            // If yes, move the player to the empty tile
+            result.player_col++;
+        }
+        else if (result.player_col + 1 < MAX_COL && map[result.player_row][result.player_col + 1].type == BRANCH) {
+            // If the destination tile contains a branch
+            // Move the player and remove the branch
+            result.player_col++;
+            map[result.player_row][result.player_col].type = EMPTY;
+            // Alert nearby flowers about the player's action
+            alert(map, result.player_row, result.player_col);
+        }
+    }
+
+    // Return the updated result after the player's movement
+    return result;
+}
+
+
+
+
+// Function to move the player on the game map based on the given command
+struct result move_player(struct tile map[MAX_ROW][MAX_COL], struct result result, char command) {
+    // Check the command provided by the player
+    if (command == 'w') {
+        // Move the player upwards ('w' key)
+        if (result.player_row - 1 >= 0 && 
+            map[result.player_row - 1][result.player_col].type == EMPTY) {
+            // Check if the destination tile is empty
+            // If yes, move the player to the empty tile
+            result.player_row--;
+        }
+        else if (result.player_row - 1 >= 0 && map[result.player_row - 1][result.player_col].type == BRANCH) {
+            // If the destination tile contains a branch
+            // Move the player and remove the branch
+            result.player_row--;
+            map[result.player_row][result.player_col].type = EMPTY;
+            // Alert nearby flowers about the player's action
+            alert(map, result.player_row, result.player_col);
+        }
+    }
+    else if (command == 's') {
+        // Move the player downwards ('s' key)
+        if (result.player_row + 1 < MAX_ROW && map[result.player_row + 1][result.player_col].type == EMPTY) {
+            // Check if the destination tile is empty
+            // If yes, move the player to the empty tile
+            result.player_row++;
+        }
+        else if (result.player_row + 1 < MAX_ROW && map[result.player_row + 1][result.player_col].type == BRANCH) {
+            // If the destination tile contains a branch
+            // Move the player and remove the branch
+            result.player_row++;
+            map[result.player_row][result.player_col].type = EMPTY;
+            // Alert nearby flowers about the player's action
+            alert(map, result.player_row, result.player_col);
+        }
+    }
+    else if (command == 'a') {
+        // Move the player to the left ('a' key)
+        if (result.player_col - 1 >= 0 && map[result.player_row][result.player_col - 1].type == EMPTY) {
+            // Check if the destination tile is empty
+            // If yes, move the player to the empty tile
+            result.player_col--;
+        }
+        else if (result.player_col - 1 >= 0 && map[result.player_row][result.player_col - 1].type == BRANCH) {
+            // If the destination tile contains a branch
+            // Move the player and remove the branch
+            result.player_col--;
+            map[result.player_row][result.player_col].type = EMPTY;
+            // Alert nearby flowers about the player's action
+            alert(map, result.player_row, result.player_col);
+        }
+    }
+    else if (command == 'd') {
+        // Move the player to the right ('d' key)
+        if (result.player_col + 1 < MAX_COL && map[result.player_row][result.player_col + 1].type == EMPTY) {
+            // Check if the destination tile is empty
+            // If yes, move the player to the empty tile
+            result.player_col++;
+        }
+        else if (result.player_col + 1 < MAX_COL && map[result.player_row][result.player_col + 1].type == BRANCH) {
+            // If the destination tile contains a branch
+            // Move the player and remove the branch
+            result.player_col++;
+            map[result.player_row][result.player_col].type = EMPTY;
+            // Alert nearby flowers about the player's action
+            alert(map, result.player_row, result.player_col);
+        }
+    }
+
+    // Return the updated result after the player's movement
     return result;
 }

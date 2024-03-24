@@ -8,20 +8,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-//------------------------------------------------------------------------------
 // Constants
-//------------------------------------------------------------------------------
 
 #define MAX_ROW 11
 #define MAX_COL 11
 #define TRUE 1
 #define FALSE 0
 
-// TODO: put your constants here 
-
-//------------------------------------------------------------------------------
 // Struct & Enum
-//------------------------------------------------------------------------------
 
 enum flower_state {
     NONE,
@@ -53,30 +47,19 @@ struct tile {
     struct flower flower;
 };
 
-// TODO: Put your structs here 
-
 struct result
 {
     int player_row;
     int player_col;
     int player_alive;
-    //
     int alert_row;
     int alert_col;
-    
     int game_alive;
 };
 
 
-////////////////////////////////
+// Protos
 
-
-//     ██████   ██████     ██████    ████████    ██████ 
-//     ██  ██   ██   ██   ██    ██      ██      ██    ██
-//     ██████   ██████    ██    ██      ██      ██    ██
-//     ██       ██   ██   ██    ██      ██      ██    ██
-//     ██       ██   ██    ██████       ██       ██████ 
-// 
 // Stage 1
 void print_foliage(struct tile map[MAX_ROW][MAX_COL], struct result result);
 void print_branch(struct tile map[MAX_ROW][MAX_COL]);
@@ -94,9 +77,7 @@ int check_game_status(struct tile map[11][11], struct result result);
 
 
 
-//--------------------------------
 // Provided Function Prototypes
-//--------------------------------
 
 void initialise_map(struct tile map[MAX_ROW][MAX_COL]);
 void print_map(
@@ -109,13 +90,7 @@ void print_tile(struct tile tile);
 void print_flower(struct flower flower);
 
 
-
-//    ███    ███     █████     ██████    ███    ██ 
-//    ████  ████    ██   ██      ██      ████   ██ 
-//    ██ ████ ██    ███████      ██      ██ ██  ██ 
-//    ██  ██  ██    ██   ██      ██      ██  ██ ██ 
-//    ██      ██    ██   ██    ██████    ██   ████ 
-
+// Main
 
 int main(void) {
     struct tile map[MAX_ROW][MAX_COL];
@@ -156,14 +131,6 @@ int main(void) {
     return 0;
 }
 
-
-//     ███████   ██    ██   ███    ██    ██████   ████████
-//     ██        ██    ██   ████   ██   ██           ██   
-//     █████     ██    ██   ██ ██  ██   ██           ██   
-//     ██        ██    ██   ██  ██ ██   ██           ██   
-//     ██         ██████    ██   ████    ██████      ██   
-
-// stage 1.3 - 1.4
 
 void print_foliage(struct tile map[MAX_ROW][MAX_COL], struct result result)
 {
@@ -325,13 +292,16 @@ struct result action(struct tile map[MAX_ROW][MAX_COL], struct result result) {
     // loop commands as long as a valid input
     // ctrl + d will stop the loop
     while (return_val == 1) {
-        //command: move or cut
+        //if command is c, call cut_flower function
         if (command == 'c') {
             result = cut_flower(map, result);
         }
+        // else, call move_player function
         else {
             result = move_player(map, result, command);
         }
+
+        // update the map
         print_map(map, result.player_row, result.player_col);
 
         // check game status and decide whether to continue
@@ -340,6 +310,7 @@ struct result action(struct tile map[MAX_ROW][MAX_COL], struct result result) {
             printf("Enter command: ");
             return_val = scanf(" %c", &command);
         }
+        // if 'result.game_alive' is FALSE, stop the game
         else {
             break;
         }
@@ -347,15 +318,23 @@ struct result action(struct tile map[MAX_ROW][MAX_COL], struct result result) {
     return result;
 }
 
+// function to move the player on the game map based on player's command
 struct result move_player(struct tile map[MAX_ROW][MAX_COL], struct result result, char command) {
+    // check the command
+    // if command is w
     if (command == 'w') {
+        // check is the target tile is within the boundaries and empty
         if (result.player_row - 1 >= 0 && 
             map[result.player_row - 1][result.player_col].type == EMPTY) {
+            // if yes, move the player to the target tile
             result.player_row--;
         }
+        // check is the target tile is within the boundaries and is a branch
         else if (result.player_row - 1 >= 0 && map[result.player_row - 1][result.player_col].type == BRANCH) {
             result.player_row--;
+            // if yes, remove the branch and move the player to the target tile
             map[result.player_row][result.player_col].type = EMPTY;
+            // alert nearby flowers
             alert(map, result.player_row, result.player_col);
         }
     }
@@ -481,49 +460,7 @@ int check_game_status(struct tile map[11][11], struct result result) {
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // Provided Functions
-
-//       ██████     ██████    ███████    ████████
-//      ██            ██      ██            ██   
-//      ██   ███      ██      █████         ██   
-//      ██    ██      ██      ██            ██   
-//       ██████     ██████    ██            ██   
-
 
 /**
  * Initialises the game map with empty tiles, setting the type of each tile to 
@@ -631,5 +568,3 @@ void print_flower(struct flower flower) {
         printf("*w*");
     }
 }
-
-
