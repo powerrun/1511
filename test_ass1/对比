@@ -463,3 +463,51 @@ void place_bush_around_flower(struct tile map[MAX_ROW][MAX_COL], int flower_row,
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Function to print foliage on the map based on user input
+void print_foliage(struct tile map[MAX_ROW][MAX_COL], struct result result) {
+    char foliage_type = ' '; // Type of foliage to be printed
+    int num_foliage; // Number of foliage tiles to be printed
+    printf("How many tiles of foliage: ");
+    scanf("%d", &num_foliage); // Input number of foliage tiles
+
+    for (int count = 0; count < num_foliage; count++) {
+        // Scan in the type of foliage
+        scanf(" %c", &foliage_type);
+        
+        // Branch
+        if (foliage_type == 'b') {
+            print_branch(map); // Print a branch on the map
+        }
+        // Bush
+        else if (foliage_type == 'u') {
+            print_bush(map); // Print a bush on the map
+        }
+    }
+    print_map(map, result.player_row, result.player_col); // Print the updated map
+}
