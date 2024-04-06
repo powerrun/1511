@@ -1,4 +1,4 @@
-// Written by YOUR-NAME (YOUR-ZID), on TODAYS-DATE
+// Written by Ruikang Xiao (z5473233)
 
 #include <stdio.h>
 
