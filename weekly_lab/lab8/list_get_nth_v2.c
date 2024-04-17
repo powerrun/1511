@@ -1,8 +1,6 @@
 // List get nth
 // list_get_nth.c
 //
-// This program was written by Ruikang Xiao (z5473233)
-// on March 7 2024
 //
 // Prints the nth element in a linked list
 

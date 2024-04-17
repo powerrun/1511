@@ -140,7 +140,7 @@ int append_crepe_custom(struct day *current_day,
                         int is_gluten_free, 
                         int diameter_cm);
 
-// Appends a newly ordered custom crepe to the day's orders
+// Appends a newly ordered signature crepe to the day's orders
 // 
 // Parameters:
 //      current_day     - current day being used in the list of days
@@ -308,11 +308,11 @@ struct day *cycle_days(char command,
 // 
 // Parameters:
 //      current_day - the current day
-//      position    - position of the crepe to remove, indexed from 0
-//                    e.g. 0: first crepe, 1: second crepe
+//      position    - position of the crepe to remove, indexed from 1
+//                    e.g. 1: first crepe, 2: second crepe
 // Returns:
 //      a constant indicating if the crepe was removed successfully, or if
-//      the given position or current_day was invalid.
+//      the given position was invalid.
 //
 int remove_crepe(struct day *current_day, int position);
 
@@ -324,8 +324,7 @@ int remove_crepe(struct day *current_day, int position);
 //      current_day - pointer to a pointer to the current day
 //      remove_date - date to remove
 // Returns:
-//      a struct containing a pointer to the first day, and an int indicating
-//      if the day removed was the only one in the list
+//      a pointer to the first day in the list of days chronologically
 //
 struct day *remove_day(struct day *day_one, 
                        struct day **current_day, 
