@@ -1,12 +1,13 @@
 // Assignment 2 24T1 COMP1511: Crepe Stand
 // crepe_stand.c
 //
-// This program was written by z5473233
-// on YYYY-MM-DD
-//
-// Version 1.0.0: Assignment released.
-//
-// DESCRIPTION OF YOUR PROGRAM HERE
+// DESCRIPTION:
+// This is a crepe order tracker that records and provides information about
+// the daily sales of crepes, the amount sold, and the bills.
+// The programme also provides operations on date and orders.
+// Furthermore, this program can provide some insights on profits
+// by asking Zeller and his formula.
+// :)
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,30 +15,44 @@
 
 #include "crepe_stand.h"
 
+
 #define SIG_STRAWBERRY 's'
 #define SIG_MATCHA 'm'
 #define SIG_CHOCOLATE 'c'
 #define NO_SIG_SOLD 'n'
 #define NO_SIG_MOST_POP 'N'
 
-// Add any extra #includes your code needs here.
-
-
-// Your enums go here:
-
-
-// Add your own #defines here:
-
-#define ZERO_INCOME 0.0
-#define MEDIUM 25
-
+#define ZERO 0
+#define FIRST 1
 #define TRUE 1
 #define FALSE 0
+
+#define ALL_TOPPING_TYPES 4
+#define MEDIUM 25
+#define SIZE_10CM 10
+#define SIZE_20CM 20
+#define SIZE_30CM 30
+#define SIZE_40CM 40
+
+#define PRICE_BASIC_BATTER 8
+#define PRICE_MATCHA_BATTER 9.5
+#define PRICE_FRUIT_TOPPING 2
+#define PRICE_NUTELLA_TOPPING 3.5
+#define PRICE_GFO 0.6
+#define PRICE_MEDIUM_SIZE 2.5
+#define PRICE_LARGE_SIZE 3.5
+
 #define NEXT_DAY '>'
 #define PREV_DAY '<'
 
+#define MONDAY 2
+#define FRIDAY 6
 
-////////////////////////////////////////////////////////////////////////////////
+#define WEEKDAY_COST 35
+#define WEEKEND_COST 50
+
+
+// Structs
 
 // A single crepe
 //      Stores all the information about a single crepe.
@@ -83,21 +98,7 @@ struct day {
     struct day *next;
 };
 
-// Add any other structs you define here.
-
-////////////////////////////////////////////////////////////////////////////////
-
-// My prototypes
-
-struct crepe *create_crepe_signature(char *customer_name, char *crepe_type);
-
-int is_the_same_day(struct day *a_day, struct day *another_day);
-
-
-
-
-// Stage 1
-
+// Prototypes:
 
 // Creates a new custom crepe
 //
@@ -110,51 +111,84 @@ int is_the_same_day(struct day *a_day, struct day *another_day);
 // Returns:
 //      pointer to newly created struct crepe
 //
-struct crepe *create_crepe(
-    char *customer_name,
-    enum batter_type batter,
-    enum topping_type topping,
-    int is_gluten_free,
-    int diameter_cm
-);
+struct crepe *create_crepe(char *customer_name,
+                           enum batter_type batter,
+                           enum topping_type topping,
+                           int is_gluten_free,
+                           int diameter_cm);
 
-// Stage 2
+int validate_crepe(enum batter_type batter,
+                   enum topping_type topping,
+                   int is_gluten_free,
+                   int diameter_cm);
 
+int valid_batter(enum batter_type batter);
 
-// Stage 3
+int valid_topping(enum topping_type topping);
 
+int valid_gfo(int is_gluten_free);
 
-// Stage 4
+int valid_size(int diameter_cm);
 
+struct crepe *create_sig_crepe(char *customer_name, char *crepe_type);
 
-// You need to implement the following functions.
-// You can find descriptions of what each function
-// should do in crepe_stand.h
+int append_crepe(struct day *current_day,
+                 struct crepe *current_crepe,
+                 struct crepe *new_crepe);
 
-//////////////////////////////////////////////////////////////////////
-//                        Stage 1 Functions                         //
-//////////////////////////////////////////////////////////////////////
+int insert_order_specific_position(struct day *current_day,
+                                   struct crepe *new_crepe,
+                                   int position);
 
-// Provided Function stubs:
+struct stats count_batter(struct stats *stats, struct crepe *current_crepe);
 
+struct stats count_size(struct stats *stats, struct crepe *current_crepe);
+
+struct stats count_gluten_free(struct stats *stats,
+                               struct crepe *current_crepe);
+
+struct stats find_pop_topping(struct stats *stats, int *topping_counts);
+
+double get_crepe_price(struct crepe *current_crepe);
+
+void count_signature_crepe(struct crepe *current_crepe,
+                           int *strawberry_count,
+                           int *matcha_count,
+                           int *chocolate_count);
+
+char find_most_pop_sig(int strawberry_count,
+                       int matcha_count,
+                       int chocolate_count);
+
+int is_date_equal(struct date date1, struct date date2);
+
+int ask_zeller_weekend(struct day *current_day);
+
+struct profits calculate_profit(struct profits profit,
+                                int is_weekend,
+                                double income);
+
+// Functions:
+
+// Create a new day with the given date
 struct day *create_day(struct date new_date) {
     struct day *new_day = malloc(sizeof(struct day));
 
+    // Initialize values of new_day
     new_day->date = new_date;
     new_day->orders = NULL;
-    new_day->income = ZERO_INCOME;
+    new_day->income = ZERO;
     new_day->next = NULL;
 
     return new_day;
 }
 
-struct crepe *create_crepe(
-    char *customer_name,
-    enum batter_type batter,
-    enum topping_type topping,
-    int is_gluten_free,
-    int diameter_cm
-) {
+// Add a new custom crepe to the end of the orders list
+struct crepe *create_crepe(char *customer_name,
+                           enum batter_type batter,
+                           enum topping_type topping,
+                           int is_gluten_free,
+                           int diameter_cm) {
     struct crepe *new_crepe = malloc(sizeof(struct crepe));
 
     // Copy the customer name into the new crepe
@@ -170,125 +204,183 @@ struct crepe *create_crepe(
     return new_crepe;
 }
 
+// Append a new custom crepe to the end of the orders list
+int append_crepe_custom(struct day *current_day,
+                        char *customer_name,
+                        enum batter_type batter,
+                        enum topping_type topping,
+                        int is_gluten_free,
+                        int diameter_cm) {
 
-int append_crepe_custom(
-    struct day *current_day,
-    char *customer_name,
-    enum batter_type batter,
-    enum topping_type topping,
-    int is_gluten_free,
-    int diameter_cm
-) {
-    // Handling Errors
-    if (batter != ORIGINAL &&
-        batter != CHOCOLATE &&
-        batter != MATCHA) {
-        return INVALID_BATTER;
-    }
-    if (topping != NO_TOPPING &&
-        topping != BANANA &&
-        topping != STRAWBERRY &&
-        topping != NUTELLA) {
-        return INVALID_TOPPING;
-    }
-    if (is_gluten_free != 0 &&
-        is_gluten_free != 1) {
-        return INVALID_GFO;
-    }
-    if (diameter_cm < 10 || diameter_cm > 40) {
-        return INVALID_SIZE;
+    // Validate values of the crepe
+    int validation = validate_crepe(batter,
+                                    topping,
+                                    is_gluten_free,
+                                    diameter_cm);
+    if (validation != VALID_CREPE) {
+        return validation;
     }
 
-    struct crepe *current = current_day->orders;
+    // Create a new crepe
+    struct crepe *current_crepe = current_day->orders;
     struct crepe *new_crepe = create_crepe(customer_name,
                                            batter,
                                            topping,
                                            is_gluten_free,
                                            diameter_cm);
 
-    if (current_day->orders == NULL) {
-        current_day->orders = new_crepe;
-    } else {
-        // find the last crepe
-        while (current->next != NULL) {
-            current = current->next;
-        }
-        current->next = new_crepe;
-    }
-
-    return VALID_CREPE;
+    return append_crepe(current_day, current_crepe, new_crepe);
 }
 
-
+// Append a new signature crepe to the end of the orders list
 int append_crepe_signature(struct day *current_day,
                            char *customer_name,
                            char *crepe_type) {
-    struct crepe *new_crepe = create_crepe_signature(customer_name, crepe_type);
+    struct crepe *new_crepe = create_sig_crepe(customer_name, crepe_type);
     struct crepe *current_crepe = current_day->orders;
 
-    if (current_crepe == NULL) {
-        current_day->orders = new_crepe;
-        return VALID_CREPE;
-    }
-    while (current_crepe->next != NULL) {
-        current_crepe = current_crepe->next;
-    }
-
-    current_crepe->next = new_crepe;
-    return VALID_CREPE;
+    // Append new signature crepe
+    return append_crepe(current_day, current_crepe, new_crepe);
 }
 
-
+// Print all the crepes orders at a given day
 void print_crepes(struct day *current_day) {
+    // Point to the first crepe
     struct crepe *current_crepe = current_day->orders;
 
+    // If there are no crepes, print a message and return
     if (current_crepe == NULL) {
         print_no_crepes();
     }
 
-    int position = 1;
+    int position = FIRST;
 
+    // Print each crepe in the list
     while (current_crepe != NULL) {
         print_single_crepe(current_crepe, position);
 
+        // Print arrow(s) for multiple crepes
         if (current_crepe->next != NULL) {
             print_arrow();
         }
 
+        // Move to the next crepe
         current_crepe = current_crepe->next;
         position++;
     }
 }
 
+// Count the number of crepes in the orders list
 int count_crepes(struct day *current_day) {
+    // Get the first crepe in the list
     struct crepe *current_crepe = current_day->orders;
     int count;
 
-    for (count = 0; current_crepe != NULL; count++) {
+    // Count the number of crepes
+    for (count = ZERO; current_crepe != NULL; count++) {
         current_crepe = current_crepe->next;
     }
     return count;
 }
 
-// My functions:
-
-struct crepe *create_crepe_signature(char *customer_name, char *crepe_type) {
+// Create a new signature crepe based on the matched type
+struct crepe *create_sig_crepe(char *customer_name, char *crepe_type) {
     if (strcmp(crepe_type, "matcha") == SUCCESS) {
-        return create_crepe(customer_name, MATCHA, STRAWBERRY, FALSE, MEDIUM);
-    } else if (strcmp(crepe_type, "strawberry") == SUCCESS) {
-        return create_crepe(customer_name, ORIGINAL, STRAWBERRY, TRUE, MEDIUM);
-    } else if (strcmp(crepe_type, "chocolate") == SUCCESS) {
-        return create_crepe(customer_name, CHOCOLATE, NUTELLA, FALSE, MEDIUM);
+        return create_crepe(customer_name,
+                            MATCHA,
+                            STRAWBERRY,
+                            FALSE,
+                            MEDIUM);
     }
+
+    if (strcmp(crepe_type, "strawberry") == SUCCESS) {
+        return create_crepe(customer_name,
+                            ORIGINAL,
+                            STRAWBERRY,
+                            TRUE,
+                            MEDIUM);
+    }
+
+    if (strcmp(crepe_type, "chocolate") == SUCCESS) {
+        return create_crepe(customer_name,
+                            CHOCOLATE,
+                            NUTELLA,
+                            FALSE,
+                            MEDIUM);
+    }
+
     return NULL;
 }
 
-//////////////////////////////////////////////////////////////////////
-//                        Stage 2 Functions                         //
-//////////////////////////////////////////////////////////////////////
+// Validate values of the crepe
+int validate_crepe(enum batter_type batter,
+                   enum topping_type topping,
+                   int is_gluten_free,
+                   int diameter_cm) {
 
-// Provided function stubs:
+    if (!valid_batter(batter)) {
+        return INVALID_BATTER;
+    }
 
+    if (!valid_topping(topping)) {
+        return INVALID_TOPPING;
+    }
+
+    if (!valid_gfo(is_gluten_free)) {
+        return INVALID_GFO;
+    }
+
+    if (!valid_size(diameter_cm)) {
+        return INVALID_SIZE;
+    }
+
+    // If all values are valid, return VALID_CREPE
+    return VALID_CREPE;
+}
+
+// Validate the batter type
+int valid_batter(enum batter_type batter) {
+    return (batter == ORIGINAL || batter == CHOCOLATE || batter == MATCHA);
+}
+
+// Validate the topping type
+int valid_topping(enum topping_type topping) {
+    return (topping == NO_TOPPING || topping == BANANA ||
+            topping == STRAWBERRY || topping == NUTELLA);
+}
+
+// Validate the gluten free option
+int valid_gfo(int is_gluten_free) {
+    return (is_gluten_free == TRUE || is_gluten_free == FALSE);
+}
+
+// Validate size of the crepe
+int valid_size(int diameter_cm) {
+    return (diameter_cm >= SIZE_10CM && diameter_cm <= SIZE_40CM);
+}
+
+// Append a new crepe to the end of the orders list
+int append_crepe(struct day *current_day,
+                 struct crepe *current_crepe,
+                 struct crepe *new_crepe) {
+
+    // If there are no crepes, just append the new crepe
+    if (current_crepe == NULL) {
+        current_day->orders = new_crepe;
+    } else {
+        // else find the last crepe then add new_crepe
+        while (current_crepe->next != NULL) {
+            current_crepe = current_crepe->next;
+        }
+
+        // Append the new crepe
+        current_crepe->next = new_crepe;
+    }
+
+    return VALID_CREPE;
+}
+
+// Insert a new custom crepe based on a given position
 int insert_crepe_custom(struct day *current_day,
                         int position,
                         char *customer_name,
@@ -296,295 +388,329 @@ int insert_crepe_custom(struct day *current_day,
                         enum topping_type topping,
                         int is_gluten_free,
                         int diameter_cm) {
-    if (position < 1) {
+    // Validate the position and crepe
+    if (position < FIRST) {
         return INVALID_POSITION;
     }
 
-    // Handling Errors
-    if (batter != ORIGINAL &&
-        batter != CHOCOLATE &&
-        batter != MATCHA) {
-        return INVALID_BATTER;
-    }
-    if (topping != NO_TOPPING &&
-        topping != BANANA &&
-        topping != STRAWBERRY &&
-        topping != NUTELLA) {
-        return INVALID_TOPPING;
-    }
-    if (is_gluten_free != 0 &&
-        is_gluten_free != 1) {
-        return INVALID_GFO;
-    }
-    if (diameter_cm < 10 || diameter_cm > 40) {
-        return INVALID_SIZE;
+    int validation = validate_crepe(batter,
+                                    topping,
+                                    is_gluten_free,
+                                    diameter_cm);
+    if (validation != VALID_CREPE) {
+        return validation;
     }
 
-    // Create a new crepe using provided values
+    // Create a new crepe based on provided values
     struct crepe *new_crepe = create_crepe(customer_name,
                                            batter,
                                            topping,
                                            is_gluten_free,
                                            diameter_cm);
 
+    // If position is greater than the number of crepes,
+    // just append at the end.
     if (position > count_crepes(current_day)) {
-        append_crepe_custom(current_day,
-                            customer_name,
-                            batter,
-                            topping,
-                            is_gluten_free,
-                            diameter_cm);
+        append_crepe(current_day, current_day->orders, new_crepe);
         return VALID_CREPE;
     }
 
-
-    // Insert at head if position is 1
-    if (position == 1) {
-        new_crepe->next = current_day->orders;
-        current_day->orders = new_crepe;
-        return VALID_CREPE;
-    }
-
-    // Find the position to insert the new crepe
-    struct crepe *current = current_day->orders;
-    struct crepe *previous = NULL;
-    int count = 1; // Start counting from 1, as the list is 1-indexed
-
-    while (current != NULL && count < position) {
-        previous = current;
-        current = current->next;
-        count++;
-    }
-
-    new_crepe->next = current;
-    if (previous != NULL) {
-        previous->next = new_crepe;
-    }
-
-    return VALID_CREPE;
+    // Insert at the position that between 1 and crepes number
+    return insert_order_specific_position(current_day, new_crepe, position);
 }
 
-
+// Insert a new signature crepe based on a given position
 int insert_crepe_signature(struct day *current_day,
                            int position,
                            char *customer_name,
                            char *crepe_type) {
+    // Validate the position
     if (position < 1) {
         return INVALID_POSITION;
     }
 
-    struct crepe *new_crepe = create_crepe_signature(customer_name, crepe_type);
+    // Create a new_crepe
+    struct crepe *new_crepe = create_sig_crepe(customer_name, crepe_type);
 
+    // If position is greater than the number of crepes,
+    // append at the end
     if (position > count_crepes(current_day)) {
-        append_crepe_signature(current_day,
-                               customer_name,
-                               crepe_type);
+        append_crepe_signature(current_day, customer_name, crepe_type);
         return VALID_CREPE;
     }
 
-
-    // Insert at head if position is 1
-    if (position == 1) {
-        new_crepe->next = current_day->orders;
-        current_day->orders = new_crepe;
-        return VALID_CREPE;
-    }
-
-    // Find the position to insert the new crepe
-    struct crepe *current = current_day->orders;
-    struct crepe *previous = NULL;
-    int count = 1; // Start counting from 1, as the list is 1-indexed
-
-    while (current != NULL && count < position) {
-        previous = current;
-        current = current->next;
-        count++;
-    }
-
-    new_crepe->next = current;
-    if (previous != NULL) {
-        previous->next = new_crepe;
-    }
-
-    // // If position is beyond the end, append to the end
-
-    return VALID_CREPE;
-
+    // Insert at the position that between 1 and crepes number
+    return insert_order_specific_position(current_day, new_crepe, position);
 }
 
+// Statistics for the day
 struct stats get_stats(struct day *current_day) {
-    struct stats stats = {0, 0, 0, 0, 0, NO_TOPPING, 0, 0, 0};
-    // Corresponding to NO_TOPPING, BANANA, STRAWBERRY, NUTELLA
-    int topping_counts[4] = {0, 0, 0, 0};
+    struct stats stats = {ZERO};
+    int topping_counts[ALL_TOPPING_TYPES] = {ZERO};
 
+    // Traverse list and update stats
     struct crepe *current_crepe = current_day->orders;
+
+    // Count the number of crepes
     while (current_crepe != NULL) {
+
+        // Count the number of crepes
         stats.total_crepes++;
-        if (current_crepe->batter == ORIGINAL) {
-            stats.original++;
-        } else if (current_crepe->batter == CHOCOLATE) {
-            stats.chocolate++;
-        } else if (current_crepe->batter == MATCHA) {
-            stats.matcha++;
-        }
 
-        if (current_crepe->is_gluten_free) {
-            stats.gluten_free++;
-        }
+        // Count the number of each batter
+        stats = count_batter(&stats, current_crepe);
 
+        // Count the number of gluten free crepes
+        stats = count_gluten_free(&stats, current_crepe);
+
+        // Count the number of toppings
         topping_counts[current_crepe->topping]++;
 
-        if (current_crepe->diameter_cm < 20) {
-            stats.small++;
-        } else if (current_crepe->diameter_cm < 30) {
-            stats.medium++;
-        } else {
-            stats.large++;
-        }
+        // Count the number of each topping
+        stats = count_size(&stats, current_crepe);
 
+        // Move forward
         current_crepe = current_crepe->next;
     }
 
-    int max_topping_count = 0;
-    int max_topping_index = 0;
-    int max_topping_count_occurrences = 0;
-    for (int i = 0; i < 4; i++) {
-        if (topping_counts[i] > max_topping_count) {
-            max_topping_count = topping_counts[i];
-            max_topping_index = i;
-            max_topping_count_occurrences = 1;
-        } else if (topping_counts[i] == max_topping_count) {
-            max_topping_count_occurrences++;
-        }
-    }
-
-    if (max_topping_count_occurrences > 1) {
-        stats.popular_topping = NO_TOPPING;
-    } else {
-        stats.popular_topping = max_topping_index;
-    }
+    // Find the most popular topping
+    stats = find_pop_topping(&stats, topping_counts);
 
     return stats;
 }
 
+// Calculates the price of a crepe at a given position
 double calculate_price(struct day *current_day, int position) {
-    // Handling Errors
-    if (position < 1 || position > count_crepes(current_day)) {
+    // Validate the position
+    if (position < FIRST || position > count_crepes(current_day)) {
         return INVALID_POSITION;
     }
 
+    // Find the crepe at the given position
+    int count = FIRST;
     struct crepe *current_crepe = current_day->orders;
-    int count = 1;
-    double price = 0.0;
 
     while (count != position) {
         current_crepe = current_crepe->next;
         count++;
     }
 
-    if (current_crepe->batter == ORIGINAL ||
-        current_crepe->batter == CHOCOLATE) {
-        price += 8;
-    } else {
-        price += 9.5;
-    }
-
-    if (current_crepe->topping == BANANA ||
-        current_crepe->topping == STRAWBERRY) {
-        price += 2;
-    } else if (current_crepe->topping == NUTELLA) {
-        price += 3.5;
-    }
-
-    if (current_crepe->is_gluten_free == 1) {
-        price += 0.6;
-    }
-
-    if (current_crepe->diameter_cm >= 20 && current_crepe->diameter_cm < 30) {
-        price += 2.5;
-    } else if (current_crepe->diameter_cm >= 30 &&
-               current_crepe->diameter_cm < 40) {
-        price += 3.5;
-    }
-
-    return price;
+    // Return the price
+    return get_crepe_price(current_crepe);
 }
 
+// Calculates total income of a day
 double total_income(struct day *current_day) {
     struct crepe *current_crepe = current_day->orders;
-    double income = 0;
-    int position = 1;
+    double income = ZERO;
+    int position = FIRST;
 
     while (current_crepe != NULL) {
         income += calculate_price(current_day, position);
+        // Move forward
         position++;
         current_crepe = current_crepe->next;
     }
     return income;
 }
 
-
+// Calculate bill for a customer
 struct bill customer_bill(struct day *current_day, char *customer_name) {
     struct crepe *current_crepe = current_day->orders;
-    int position = 0;
+    int position = ZERO;
     struct bill bill;
-    bill.total_price = 0.0;
-    bill.crepe_count = 0;
+    bill.total_price = ZERO;
+    bill.crepe_count = ZERO;
 
+    // Traverse the list
     while (current_crepe != NULL) {
         position++;
-        if (strcmp(current_crepe->customer_name, customer_name) == 0) {
+
+        // Calculate the price and crepe amount for matched customer
+        if (strcmp(current_crepe->customer_name, customer_name) == SUCCESS) {
             bill.total_price += calculate_price(current_day, position);
             bill.crepe_count++;
         }
         current_crepe = current_crepe->next;
     }
+
     return bill;
 }
 
-// Your functions go here (include function comments):
+// Insert a new crepe into the list
+int insert_order_specific_position(struct day *current_day,
+                                   struct crepe *new_crepe,
+                                   int position) {
+    // If position is 1, insert at head
+    if (position == FIRST) {
+        new_crepe->next = current_day->orders;
+        current_day->orders = new_crepe;
+        return VALID_CREPE;
+    }
 
+    // Else find the position then insert it
+    struct crepe *current_crepe = current_day->orders;
+    struct crepe *prev_crepe = NULL;
+    int count = 1;
 
-//////////////////////////////////////////////////////////////////////
-//                        Stage 3 Functions                         //
-//////////////////////////////////////////////////////////////////////
+    // Find the correct position
+    while (current_crepe != NULL && count < position) {
+        prev_crepe = current_crepe;
+        current_crepe = current_crepe->next;
+        count++;
+    }
 
-// Provided function stubs:
+    // Insert the crepe
+    new_crepe->next = current_crepe;
+    if (prev_crepe != NULL) {
+        prev_crepe->next = new_crepe;
+    }
 
+    return VALID_CREPE;
+}
+
+// Count the number of batter
+struct stats count_batter(struct stats *stats, struct crepe *current_crepe) {
+    // Count the number of ORIGINAL batter
+    if (current_crepe->batter == ORIGINAL) {
+        stats->original++;
+    }
+
+    // Count the number of CHOCOLATE batter
+    if (current_crepe->batter == CHOCOLATE) {
+        stats->chocolate++;
+    }
+
+    // Count the number of MATCHA batter
+    if (current_crepe->batter == MATCHA) {
+        stats->matcha++;
+    }
+
+    return (*stats);
+}
+
+// Count the number of size
+struct stats count_size(struct stats *stats, struct crepe *current_crepe) {
+    if (current_crepe->diameter_cm < SIZE_20CM) {
+        stats->small++;
+    } else if (current_crepe->diameter_cm < SIZE_30CM) {
+        stats->medium++;
+    } else {
+        stats->large++;
+    }
+
+    return (*stats);
+}
+
+// Count the number of gluten free crepes
+struct stats count_gluten_free(struct stats *stats,
+                               struct crepe *current_crepe) {
+    if (current_crepe->is_gluten_free) {
+        stats->gluten_free++;
+    }
+
+    return (*stats);
+}
+
+// Find the most popular topping
+struct stats find_pop_topping(struct stats *stats, int *topping_counts) {
+    int pop_index = ZERO;
+
+    for (int i = ZERO; i < ALL_TOPPING_TYPES; i++) {
+
+        // Find the most popular topping
+        // Set popular_topping to NO_TOPPING is there are multiple most popular
+        // toppings or no toppings.
+        if (topping_counts[i] > topping_counts[pop_index]) {
+            pop_index = i;
+            stats->popular_topping = pop_index;
+        }
+        else if (topping_counts[i] == topping_counts[pop_index]) {
+            stats->popular_topping = NO_TOPPING;
+        }
+    }
+
+    return (*stats);
+}
+
+// Calculate the price of a crepe
+double get_crepe_price(struct crepe *current_crepe) {
+    double price = ZERO;
+
+    // Determine the price of batter
+    if (current_crepe->batter == ORIGINAL ||
+        current_crepe->batter == CHOCOLATE) {
+        price += PRICE_BASIC_BATTER;
+    } else {
+        price += PRICE_MATCHA_BATTER;
+    }
+
+    // Determine the price of topping
+    if (current_crepe->topping == BANANA ||
+        current_crepe->topping == STRAWBERRY) {
+        price += PRICE_FRUIT_TOPPING;
+    } else if (current_crepe->topping == NUTELLA) {
+        price += PRICE_NUTELLA_TOPPING;
+    }
+
+    // Determine the price of gluten free
+    if (current_crepe->is_gluten_free == TRUE) {
+        price += PRICE_GFO;
+    }
+
+    // Determine the price of size
+    if (current_crepe->diameter_cm >= SIZE_20CM &&
+        current_crepe->diameter_cm < SIZE_30CM) {
+        price += PRICE_MEDIUM_SIZE;
+    } else if (current_crepe->diameter_cm >= SIZE_30CM &&
+               current_crepe->diameter_cm < SIZE_40CM) {
+        price += PRICE_LARGE_SIZE;
+    }
+
+    return price;
+}
+
+// Create a new day with a date
 struct day *new_day(struct day *day_one, struct date date) {
-    // create day directly if there is no day
+    // Create day directly if there is no day
     if (day_one == NULL) {
         day_one = create_day(date);
         return day_one;
     }
 
+    // Create a new day that will be inserted
     struct day *current = day_one;
     struct day *previous = NULL;
     struct day *new_day = create_day(date);
 
-    // check if the day already exists
-    if (is_the_same_day(current, new_day) == TRUE) {
+    // Check if the day already exists
+    if (is_date_equal(current->date, date)) {
         return NULL;
     }
 
-    // find the correct position to insert the new day
-    while (current != NULL) {
+    // Find the correct position to insert the new day
+    int finish = FALSE;
+    while (current != NULL && finish == FALSE) {
         if (current->date.year > date.year ||
             (current->date.year == date.year &&
              current->date.month > date.month) ||
             (current->date.year == date.year &&
              current->date.month == date.month &&
              current->date.day > date.day)) {
-            break;
+            finish = TRUE;
         }
-        // move forward
-        previous = current;
-        current = current->next;
+    
+
+        // Move forward
+        if (finish == FALSE) {
+            previous = current;
+            current = current->next;
+        }
     }
 
     new_day->next = current;
 
-    // insert the new day
+    // Insert the new day
     if (previous == NULL) {
         day_one = new_day;
     } else {
@@ -594,73 +720,54 @@ struct day *new_day(struct day *day_one, struct date date) {
     return day_one;
 }
 
+// Display information of days
+// (Date, Most popular signature crepe, Total income)
 void display_days(struct day *day_one, struct day *current_day) {
-    struct day *current = day_one;
+    struct day *current_position = day_one;
 
-    while (current != NULL) {
+    // Traverse the list
+    while (current_position != NULL) {
 
-        int is_current_day = is_the_same_day(current_day, current);
-        int strawberry_count = 0;
-        int matcha_count = 0;
-        int chocolate_count = 0;
-        struct crepe *current_crepe = current->orders;
+        // Check if the current day is the current day :)
+        int is_current_day = is_date_equal(current_day->date,
+                                           current_position->date);
+        int strawberry_count = ZERO;
+        int matcha_count = ZERO;
+        int chocolate_count = ZERO;
 
-        // count signature crepe
-        while (current_crepe != NULL) {
-            if (current_crepe->batter == ORIGINAL &&
-                current_crepe->topping == STRAWBERRY &&
-                current_crepe->is_gluten_free == TRUE &&
-                current_crepe->diameter_cm == MEDIUM) {
-                strawberry_count++;
-            }
+        struct crepe *current_crepe = current_position->orders;
 
-            if (current_crepe->batter == MATCHA &&
-                current_crepe->topping == STRAWBERRY &&
-                current_crepe->is_gluten_free == FALSE &&
-                current_crepe->diameter_cm == MEDIUM) {
-                matcha_count++;
-            }
+        // Count signature crepe
+        count_signature_crepe(current_crepe,
+                              &strawberry_count,
+                              &matcha_count,
+                              &chocolate_count);
 
-            if (current_crepe->batter == CHOCOLATE &&
-                current_crepe->topping == NUTELLA &&
-                current_crepe->is_gluten_free == FALSE &&
-                current_crepe->diameter_cm == MEDIUM) {
-                chocolate_count++;
-            }
-            current_crepe = current_crepe->next;
-        }
+        // Find most pop signature crepe
+        char most_popular_sig = find_most_pop_sig(strawberry_count,
+                                                  matcha_count,
+                                                  chocolate_count);
 
-        // find most pop signature crepe
-        char most_popular;
-        // find_most_pop ()
-        if (matcha_count > strawberry_count &&
-            matcha_count > chocolate_count) {
-            most_popular = SIG_MATCHA;
-        } else if (strawberry_count > matcha_count &&
-                   strawberry_count > chocolate_count) {
-            most_popular = SIG_STRAWBERRY;
-        } else if (chocolate_count > strawberry_count &&
-                   chocolate_count > matcha_count) {
-            most_popular = SIG_CHOCOLATE;
-        } else if (chocolate_count == 0 &&
-                   strawberry_count == 0 &&
-                   matcha_count == 0) {
-            most_popular = NO_SIG_SOLD;
-        } else {
-            most_popular = NO_SIG_MOST_POP;
-        }
+        // Calculate the day income
+        double income = total_income(current_position);
 
-        double income = total_income(current);
+        // Print the day information
+        print_single_day(is_current_day,
+                         current_position->date,
+                         most_popular_sig,
+                         income);
 
-        print_single_day(is_current_day, current->date, most_popular, income);
-        current = current->next;
+        // Move forward
+        current_position = current_position->next;
 
-        if (current != NULL) {
+        // Print arrow(s) for multiple days
+        if (current_position != NULL) {
             print_arrow();
         }
     }
 }
 
+// Cycle days between days according to left and right instructions
 struct day *cycle_days(char command,
                        struct day *day_one,
                        struct day *current_day) {
@@ -669,12 +776,14 @@ struct day *cycle_days(char command,
         // when traverse to the tail
         if (current_day->next == NULL) {
             return day_one;
-        // when traverse between head and tail
+            // when traverse between head and tail
         } else {
             return current_day->next;
         }
+    }
+
     // check previous day
-    } else if (command == PREV_DAY) {
+    if (command == PREV_DAY) {
         // when traverse to the head
         if (current_day == day_one) {
             // find the tail
@@ -682,7 +791,7 @@ struct day *cycle_days(char command,
                 current_day = current_day->next;
             }
             return current_day;
-        // when traverse between head and tail
+            // when traverse between head and tail
         } else {
             struct day *previous_day = day_one;
             while (previous_day->next != current_day) {
@@ -694,60 +803,253 @@ struct day *cycle_days(char command,
     return NULL;
 }
 
+// Remove a crepe from the list
 int remove_crepe(struct day *current_day, int position) {
-    // TODO: implement this function
-    printf("Remove Crepe not yet implemented.\n");
-    exit(1);
+    struct crepe *current_crepe = current_day->orders;
+    // Count number of crepes
+    int count = count_crepes(current_day);
+
+    // Handling errors
+    if (current_crepe == NULL || position < FIRST || position > count) {
+        return INVALID_POSITION;
+    }
+
+    struct crepe *prev_crepe = NULL;
+    int current_position = 1;
+
+    // Find the correct position
+    while (current_position < position && current_crepe != NULL) {
+        prev_crepe = current_crepe;
+        current_crepe = current_crepe->next;
+        current_position++;
+    }
+
+    // Remove the order and update the linked list
+    if (prev_crepe != NULL) {
+        // Link previous crepe to the next of current crepe
+        prev_crepe->next = current_crepe->next;
+    } else {
+        // Let the head point to the next crepe
+        current_day->orders = current_crepe->next;
+    }
+
+    // Free the removed crepe
+    free(current_crepe);
+
+    return VALID_CREPE;
 }
 
+// Removes a day from the list
 struct day *remove_day(struct day *day_one,
                        struct day **current_day,
                        struct date date) {
-    // TODO: implement this function
-    printf("Remove Day not yet implemented.\n");
+    struct day *current = day_one;
+    struct day *previous = NULL;
+
+    // Traverse the list to find the correct day
+    while (current != NULL && !is_date_equal(current->date, date)) {
+        previous = current;
+        current = current->next;
+    }
+
+    // If the day does not exist, return NULL
+    if (current == NULL) {
+        return NULL;
+    }
+
+    // Update the current day
+    if (*current_day == current) {
+        if (current->next) {
+            *current_day = current->next;
+        } else {
+            *current_day = NULL;
+        }
+    }
+
+    // Update the linked list
+    if (previous) {
+        previous->next = current->next;
+    } else {
+        day_one = current->next;
+    }
+
+    // Free removed node
+    struct crepe *crepe = current->orders;
+    while (crepe != NULL) {
+        struct crepe *next_crepe = crepe->next;
+        free(crepe);
+        crepe = next_crepe;
+    }
+    free(current);
+
+    // Create the default day if the list is empty
+    if (day_one == NULL) {
+        struct date default_date = {2024, 1, 1};
+        day_one = create_day(default_date);
+        *current_day = day_one;
+    }
+
+    // Return the head of the list
+    return day_one;
+}
+
+// Free the memory of the linked list
+void free_crepe_stand(struct day *day_one) {
+    // Traverse the list and free all nodes
+    while (day_one != NULL) {
+        // point to the new next day
+        struct day *next_day = day_one->next;
+
+        // Free all crepes for the current day
+        struct crepe *crepe = day_one->orders;
+        while (crepe != NULL) {
+            struct crepe *next_crepe = crepe->next;
+            free(crepe);
+            crepe = next_crepe;
+        }
+
+        // Free the day_one then move to the next day
+        free(day_one);
+        day_one = next_day;
+    }
+}
+
+// Compare if two dates are equal
+int is_date_equal(struct date date1, struct date date2) {
+    return (date1.year == date2.year &&
+            date1.month == date2.month &&
+            date1.day == date2.day);
+}
+
+// Counts the number of each signature crepe
+void count_signature_crepe(struct crepe *current_crepe,
+                           int *strawberry_count,
+                           int *matcha_count,
+                           int *chocolate_count) {
+    while (current_crepe != NULL) {
+        // Count the number of STRAWBERRY sig crepe
+        if (current_crepe->batter == ORIGINAL &&
+            current_crepe->topping == STRAWBERRY &&
+            current_crepe->is_gluten_free == TRUE &&
+            current_crepe->diameter_cm == MEDIUM) {
+            (*strawberry_count)++;
+        }
+
+        // Count the number of MATCHA sig crepe
+        if (current_crepe->batter == MATCHA &&
+            current_crepe->topping == STRAWBERRY &&
+            current_crepe->is_gluten_free == FALSE &&
+            current_crepe->diameter_cm == MEDIUM) {
+            (*matcha_count)++;
+        }
+
+        // Count the number of CHOCOLATE sig crepe
+        if (current_crepe->batter == CHOCOLATE &&
+            current_crepe->topping == NUTELLA &&
+            current_crepe->is_gluten_free == FALSE &&
+            current_crepe->diameter_cm == MEDIUM) {
+            (*chocolate_count)++;
+        }
+        // Move forward
+        current_crepe = current_crepe->next;
+    }
+}
+
+// Find the most popular signature crepe
+char find_most_pop_sig(int strawberry_count,
+                       int matcha_count,
+                       int chocolate_count) {
+    // MATCHA is the most popular
+    if (matcha_count > strawberry_count &&
+        matcha_count > chocolate_count) {
+        return SIG_MATCHA;
+    }
+
+    // STRAWBERRY is the most popular
+    if (strawberry_count > matcha_count &&
+        strawberry_count > chocolate_count) {
+        return SIG_STRAWBERRY;
+    }
+
+    // CHOCOLATE is the most popular
+    if (chocolate_count > strawberry_count &&
+        chocolate_count > matcha_count) {
+        return SIG_CHOCOLATE;
+    }
+
+    // No signature crepe was sold or no crepe was more popular than another
+    if (chocolate_count == ZERO &&
+        strawberry_count == ZERO &&
+        matcha_count == ZERO) {
+        return NO_SIG_SOLD;
+    } else {
+        return NO_SIG_MOST_POP;
+    }
+}
+
+// Calculate the total profits during all weekdays
+// and all weekends separately
+struct profits compare_weekday_end(struct day *day_one) {
+    struct profits profit = {ZERO, ZERO};
+    struct day *current_day = day_one;
+
+    while (current_day != NULL) {
+
+        // Find out if a day is a weekend by asking Zeller and his formula :)
+        int is_weekend = ask_zeller_weekend(current_day);
+
+        // Calculate the total income of the day
+        double income = total_income(current_day);
+
+        // Calculate the profit
+        profit = calculate_profit(profit, is_weekend, income);
+
+        current_day = current_day->next;
+    }
+
+    return profit;
+}
+
+// Traverse the list of days to find the maximum profit period
+struct max_profit max_profit_period(struct day *day_one, int year) {
     exit(1);
 }
 
-void free_crepe_stand(struct day *day_one) {
-    // TODO: implement this function
-}
+// Calculate the day of the week then return whether the day is a weekend
+int ask_zeller_weekend(struct day *current_day) {
+    // Calculate the day of the week by Common simplification form of
+    // Zeller's Congruence.
+    // https://en.wikipedia.org/wiki/Zeller%27s_congruence
+    int day = current_day->date.day;
+    int month = current_day->date.month + 12;
+    int year = current_day->date.year - 1;
+    int day_of_week = (day + (13 * (month + 1) / 5) + year + (year / 4) -
+                       (year / 100) + (year / 400)) % 7;
 
-// Your functions here (include function comments):
-//// pro
-int is_the_same_day(struct day *a_day, struct day *another_day) {
-    if (a_day->date.year == another_day->date.year &&
-        a_day->date.month == another_day->date.month &&
-        a_day->date.day == another_day->date.day) {
+    // Determine if the day is a weekend
+    // 0 = Saturday, 1 = Sunday
+    // 2 = Monday, ..., 6 = Friday
+    if (day_of_week >= MONDAY && day_of_week <= FRIDAY) {
+        return FALSE;
+    } else {
         return TRUE;
     }
-    return FALSE;
 }
 
-
-//////////////////////////////////////////////////////////////////////
-//                        Stage 4 Functions                         //
-//////////////////////////////////////////////////////////////////////
-
-// Provided function stubs:
-
-struct profits compare_weekday_end(struct day *day_one) {
-    // TODO: implement this function
-    printf("Compare Weekday end not yet implemented.\n");
-    exit(1);
+// Calculate the profit of a day and based on the income
+// and whether the day is a weekend
+struct profits calculate_profit(struct profits profit,
+                                int is_weekend,
+                                double income) {
+    if (is_weekend) {
+        profit.weekend += (income - WEEKEND_COST);
+    } else {
+        profit.weekday += (income - WEEKDAY_COST);
+    }
+    return profit;
 }
 
-struct max_profit max_profit_period(struct day *day_one, int year) {
-    // TODO: implement this function
-    printf("Max Profit Period not yet implemented.\n");
-    exit(1);
-}
-
-// Your functions here (include function comments):
-
-
-//////////////////////////////////////////////////////////////////////
-//                         Helper Functions                         //
-//////////////////////////////////////////////////////////////////////
+// Helper Functions
 
 void print_single_crepe(struct crepe *crepe, int position) {
     printf("---------------------\n");
